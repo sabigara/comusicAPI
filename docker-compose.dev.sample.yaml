@@ -1,0 +1,30 @@
+version: '3.7'
+
+services:
+  db:
+    image: mysql:8.0.19
+    container_name: comusic_db
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: database
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpass
+  
+  api:
+    build:
+      context: .
+      target: builder
+    container_name: comusic_api
+    volumes:
+      - ./:/build
+    command: make dev
+    ports:
+      - 1323:1323
+    environment:
+      DEBUG: 'true'
+      DSN: mysql://user:userpass@tcp(db:3306)/database
+      GOOGLE_APPLICATION_CREDENTIALS: <firebase_adminsdk.json>

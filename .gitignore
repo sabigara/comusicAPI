@@ -1,0 +1,5 @@
+.DS_Store
+.vscode
+.devcontainer
+/server
+docker-compose.dev.yaml

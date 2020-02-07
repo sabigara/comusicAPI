@@ -1,0 +1,5 @@
+name: Golang
+description: Build and test source code written in Golang
+runs:
+  using: docker
+  image: Dockerfile
