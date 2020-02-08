@@ -15,6 +15,10 @@ dev:
 test:
 	@go test
 
+.PHONY: migrate-create
+migrate-create:
+	@migrate create -ext sql -dir migrations $(name)
+
 .PHONY: migrate-up
 migrate-up:
 	@migrate -path ./migrations -database $${DSN} up $(n)

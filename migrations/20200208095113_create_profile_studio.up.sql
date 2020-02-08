@@ -1,0 +1,22 @@
+START TRANSACTION; 
+
+CREATE TABLE IF NOT EXISTS profiles (
+  id VARCHAR(40) NOT NULL,
+  user_id VARCHAR(40) NOT NULL UNIQUE,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  nickname VARCHAR(50) NOT NULL,
+  bio TEXT,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS studios (
+  id VARCHAR(40) NOT NULL,
+  owner_id VARCHAR(40) NOT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  name VARCHAR(50) NOT NULL,
+  PRIMARY KEY (id)
+);
+
+COMMIT

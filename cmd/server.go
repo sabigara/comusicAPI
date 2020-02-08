@@ -1,16 +1,19 @@
 package main
 
 import (
-	"database/sql"
 	"os"
 	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 	"github.com/sabigara/comusicAPI/http"
+	"github.com/sabigara/comusicAPI/interactor"
+	"github.com/sabigara/comusicAPI/mock"
+	"github.com/sabigara/comusicAPI/mysql"
 )
 
-func openDB() *sql.DB {
+func openDB() *sqlx.DB {
 	DSN, ok := os.LookupEnv("DSN")
 	if !ok {
 		panic("No DSN provided as environment variable.")
@@ -19,10 +22,8 @@ func openDB() *sql.DB {
 	if len(dsn) != 2 {
 		panic("Malformed DSN.")
 	}
-	db, err := sql.Open(dsn[0], dsn[1])
-	if err != nil {
-		panic(err.Error)
-	}
+	db := sqlx.MustConnect(dsn[0], dsn[1])
+
 	db.SetConnMaxLifetime(5 * time.Minute)
 	db.SetMaxIdleConns(25)
 	db.SetMaxOpenConns(25)
@@ -30,7 +31,17 @@ func openDB() *sql.DB {
 }
 
 func inject() {
+	db := openDB()
+	profileRepository := mysql.NewProfileRepository(db)
+	profileUsecase := interactor.NewProfileUsecase(profileRepository)
+	profileHandler := http.NewProfileHandler(profileUsecase)
 
+	studioRepository := mysql.NewStudioRepository(db)
+	studioUsecase := interactor.NewStudioUsecase(studioRepository)
+	studioHandler := http.NewStudioHandler(studioUsecase)
+
+	http.SetHandlers(profileHandler, studioHandler)
+	http.SetAuthenticate(mock.Aunthenticate)
 }
 
 func main() {

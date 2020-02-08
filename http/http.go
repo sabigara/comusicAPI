@@ -5,14 +5,24 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/sabigara/comusicAPI/auth"
+	comusic "github.com/sabigara/comusicAPI"
 )
 
-var userHandler *UserHandler
+var profileHandler *ProfileHandler
+var studioHandler *StudioHandler
+var authenticate func(...interface{}) (*comusic.User, error)
 
 // SetHandlers sets all handlers with their all dependencies injected.
-func SetHandlers(user *UserHandler) {
-	userHandler = user
+func SetHandlers(
+	profile *ProfileHandler,
+	studio *StudioHandler,
+) {
+	profileHandler = profile
+	studioHandler = studio
+}
+
+func SetAuthenticate(f func(...interface{}) (*comusic.User, error)) {
+	authenticate = f
 }
 
 func errorHandler(e *echo.Echo) func(error, echo.Context) {
@@ -54,15 +64,19 @@ func Start(addr string, debug bool) {
 	}
 	e.HTTPErrorHandler = errorHandler(e)
 
-	requireLogin := authMiddlewareWithConfig(authMiddlewareConfig{Authenticate: auth.Authenticate})
-
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 	}))
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
+	e.Use(authMiddlewareWithConfig(authMiddlewareConfig{Authenticate: authenticate}))
 
-	e.GET("users/:id", userHandler.get, requireLogin)
+	e.GET("profile", profileHandler.get)
+	e.POST("profile", profileHandler.create)
+	e.PATCH("profile", profileHandler.update)
+
+	e.GET("studios", studioHandler.get)
+	e.POST("studios", studioHandler.create)
 
 	e.Logger.Fatal(e.Start(addr))
 }
