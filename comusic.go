@@ -90,13 +90,14 @@ type Song struct {
 	Name     string
 }
 
-type SongUsecase struct {
-	FilterByStudioIDWithVersions func(studioID string) ([]*Song, []*Version, error)
+type SongUsecase interface {
+	Create(*Song) error
+	FilterByStudioIDWithVersions(studioID string) ([]*Song, []*Version, error)
 }
 
-type SongRepository struct {
+type SongRepository interface {
 	// Prefetch versions
-	FilterByStudioIDWithVersions func(studioID string) ([]*Song, []*Version, error)
+	FilterByStudioIDWithVersions(studioID string) ([]*Song, []*Version, error)
 }
 
 type Version struct {
@@ -116,8 +117,8 @@ type Track struct {
 	Takes      []string
 }
 
-type TrackUsecase struct {
-	FilterByVersionIDWithTakes func(verID string) ([]*Track, []*Take, error)
+type TrackUsecase interface {
+	FilterByVersionIDWithTakes(verID string) ([]*Track, []*Take, error)
 }
 
 type Take struct {
