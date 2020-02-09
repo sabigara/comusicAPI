@@ -86,35 +86,66 @@ type StudioRepository interface {
 
 type Song struct {
 	*Meta
-	StudioID string
-	Name     string
+	StudioID string `json:"studio_id"`
+	Name     string `json:"name"`
 }
 
+func NewSong(studioID, name string) *Song {
+	return &Song{
+		Meta:     NewMeta(),
+		StudioID: studioID,
+		Name:     name,
+	}
+}
+
+type SongVer struct {
+	Data     *Song
+	Versions []*Version
+}
+type SongVerMap map[string]*SongVer
+
 type SongUsecase interface {
-	Create(*Song) error
-	FilterByStudioIDWithVersions(studioID string) ([]*Song, []*Version, error)
+	Create(studioID, name string) (*Song, error)
+	FilterByStudioIDWithVersions(studioID string) (SongVerMap, error)
 }
 
 type SongRepository interface {
+	Create(*Song) error
 	// Prefetch versions
-	FilterByStudioIDWithVersions(studioID string) ([]*Song, []*Version, error)
+	FilterByStudioIDWithVersions(studioID string) (SongVerMap, error)
 }
 
 type Version struct {
 	*Meta
-	SongID string
-	Name   string
+	SongID string `json:"song_id"`
+	Name   string `json:"name"`
+}
+
+func NewVersion(songID, name string) *Version {
+	return &Version{
+		Meta:   NewMeta(),
+		SongID: songID,
+		Name:   name,
+	}
+}
+
+type VersionUsecase interface {
+	Create(songID, name string) (*Version, error)
+}
+
+type VersionRepository interface {
+	Create(*Version) error
 }
 
 type Track struct {
 	*Meta
-	Name       string
-	Pan        int
-	IsMuted    bool
-	IsSoloed   bool
-	Icon       int
-	ActiveTake string
-	Takes      []string
+	VersionID  string `json:"version_id"`
+	Name       string `json:"name"`
+	Pan        int    `json:"pan"`
+	IsMuted    bool   `json:"is_muted"`
+	IsSoloed   bool   `json:"is_soloed"`
+	Icon       int    `json:"icon"`
+	ActiveTake string `json:"active_take"`
 }
 
 type TrackUsecase interface {
@@ -123,7 +154,8 @@ type TrackUsecase interface {
 
 type Take struct {
 	*Meta
-	Name     string
-	FileName string
-	FileURL  string
+	TrackID  string `json:"track_id"`
+	Name     string `json:"name"`
+	FileName string `json:"file_name"`
+	FileURL  string `json:"file_url"`
 }

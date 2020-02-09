@@ -8,17 +8,23 @@ import (
 	comusic "github.com/sabigara/comusicAPI"
 )
 
-var profileHandler *ProfileHandler
+var profHandler *ProfileHandler
 var studioHandler *StudioHandler
+var songHandler *SongHandler
+var verHandler *VersionHandler
 var authenticate func(...interface{}) (*comusic.User, error)
 
 // SetHandlers sets all handlers with their all dependencies injected.
 func SetHandlers(
-	profile *ProfileHandler,
+	prof *ProfileHandler,
 	studio *StudioHandler,
+	song *SongHandler,
+	ver *VersionHandler,
 ) {
-	profileHandler = profile
+	profHandler = prof
 	studioHandler = studio
+	songHandler = song
+	verHandler = ver
 }
 
 func SetAuthenticate(f func(...interface{}) (*comusic.User, error)) {
@@ -71,12 +77,17 @@ func Start(addr string, debug bool) {
 	e.Use(middleware.CORS())
 	e.Use(authMiddlewareWithConfig(authMiddlewareConfig{Authenticate: authenticate}))
 
-	e.GET("profile", profileHandler.get)
-	e.POST("profile", profileHandler.create)
-	e.PATCH("profile", profileHandler.update)
+	e.GET("profile", profHandler.get)
+	e.POST("profile", profHandler.create)
+	e.PATCH("profile", profHandler.update)
 
 	e.GET("studios", studioHandler.get)
 	e.POST("studios", studioHandler.create)
+
+	e.POST("songs", songHandler.create)
+	e.GET("songs", songHandler.get)
+
+	e.POST("versions", verHandler.create)
 
 	e.Logger.Fatal(e.Start(addr))
 }
