@@ -1,0 +1,28 @@
+START TRANSACTION; 
+
+CREATE TABLE IF NOT EXISTS tracks (
+  id VARCHAR(40) NOT NULL,
+  version_id VARCHAR(40) NOT NULL,
+  active_take VARCHAR(50) NOT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  name VARCHAR(50) NOT NULL,
+  pan INT NOT NULL,
+  is_muted BOOLEAN NOT NULL,
+  is_soloed BOOLEAN NOT NULL,
+  icon INT NOT NULL,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS takes (
+  id VARCHAR(40) NOT NULL,
+  track_id VARCHAR(40) NOT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  name VARCHAR(50) NOT NULL,
+  file_name VARCHAR(100) NOT NULL,
+  file_url TEXT,
+  PRIMARY KEY (id)
+);
+
+COMMIT;

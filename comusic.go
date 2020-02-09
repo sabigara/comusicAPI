@@ -148,8 +148,36 @@ type Track struct {
 	ActiveTake string `json:"active_take"`
 }
 
+func NewTrack(verID, name string) *Track {
+	return &Track{
+		Meta:      NewMeta(),
+		VersionID: verID,
+		Name:      name,
+	}
+}
+
+const (
+	DrumsIcon = iota
+	BassIcon
+	GuitarIcon
+	VocalIcon
+	KeyboardIcon
+)
+
+type TrackTake struct {
+	Data  *Track
+	Takes []*Take
+}
+type TrackTakeMap map[string]*TrackTake
+
 type TrackUsecase interface {
-	FilterByVersionIDWithTakes(verID string) ([]*Track, []*Take, error)
+	Create(verID, name string) (*Track, error)
+	FilterByVersionIDWithTakes(verID string) (TrackTakeMap, error)
+}
+
+type TrackRepository interface {
+	Create(*Track) error
+	FilterByVersionIDWithTakes(verID string) (TrackTakeMap, error)
 }
 
 type Take struct {
@@ -158,4 +186,20 @@ type Take struct {
 	Name     string `json:"name"`
 	FileName string `json:"file_name"`
 	FileURL  string `json:"file_url"`
+}
+
+func NewTake(trackID, name string) *Take {
+	return &Take{
+		Meta:    NewMeta(),
+		TrackID: trackID,
+		Name:    name,
+	}
+}
+
+type TakeUsecase interface {
+	Create(trackID, name string) (*Take, error)
+}
+
+type TakeRepository interface {
+	Create(*Take) error
 }

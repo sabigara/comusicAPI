@@ -17,9 +17,9 @@ func NewVersionRepository(db *sqlx.DB) *VersionRepository {
 }
 
 func (r *VersionRepository) Create(version *comusic.Version) error {
-	_, err := r.Exec(
-		`INSERT INTO versions (id, song_id, created_at, updated_at, name)
-		 VALUES (?, ?, ?, ?, ?)`,
+	_, err := r.Exec(`
+		INSERT INTO versions (id, song_id, created_at, updated_at, name)
+		VALUES (?, ?, ?, ?, ?)`,
 		version.ID, version.SongID, version.CreatedAt, version.UpdatedAt, version.Name,
 	)
 	if err != nil {

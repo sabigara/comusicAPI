@@ -19,9 +19,9 @@ func NewProfileRepository(db *sqlx.DB) *ProfileRepository {
 }
 
 func (r *ProfileRepository) Create(p *comusic.Profile) error {
-	_, err := r.Exec(
-		`INSERT INTO profiles (id, user_id, created_at, updated_at, nickname, bio)
-		 VALUES (?, ?, ?, ?, ?, ?)`,
+	_, err := r.Exec(`
+		INSERT INTO profiles (id, user_id, created_at, updated_at, nickname, bio)
+		VALUES (?, ?, ?, ?, ?, ?)`,
 		p.ID, p.UserID, p.CreatedAt, p.UpdatedAt, p.Nickname, p.Bio,
 	)
 	if err != nil {
@@ -31,11 +31,11 @@ func (r *ProfileRepository) Create(p *comusic.Profile) error {
 }
 
 func (r *ProfileRepository) Update(id string, nickname, bio *string) error {
-	_, err := r.Exec(
-		`UPDATE profiles SET
-		 nickname = COALESCE(?, nickname),
-		 bio = COALESCE(?, bio)
-		 WHERE user_id = ?`,
+	_, err := r.Exec(`
+		UPDATE profiles SET
+		nickname = COALESCE(?, nickname),
+		bio = COALESCE(?, bio)
+		WHERE user_id = ?`,
 		nickname, bio, id,
 	)
 	if err != nil {

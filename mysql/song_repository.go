@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"database/sql"
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -18,9 +17,9 @@ func NewSongRepository(db *sqlx.DB) *SongRepository {
 }
 
 func (r *SongRepository) Create(song *comusic.Song) error {
-	_, err := r.Exec(
-		`INSERT INTO songs (id, studio_id, created_at, updated_at, name)
-		 VALUES (?, ?, ?, ?, ?)`,
+	_, err := r.Exec(`
+		INSERT INTO songs (id, studio_id, created_at, updated_at, name)
+		VALUES (?, ?, ?, ?, ?)`,
 		song.ID, song.StudioID, song.CreatedAt, song.UpdatedAt, song.Name,
 	)
 	if err != nil {
@@ -29,40 +28,18 @@ func (r *SongRepository) Create(song *comusic.Song) error {
 	return nil
 }
 
-type nullableVersion struct {
-	ID        sql.NullString
-	CreatedAt sql.NullTime
-	UpdatedAt sql.NullTime
-	SongID    sql.NullString
-	Name      sql.NullString
-}
-
-func (nv *nullableVersion) valid() bool {
-	return nv.ID.Valid && nv.CreatedAt.Valid &&
-		nv.UpdatedAt.Valid && nv.SongID.Valid && nv.Name.Valid
-}
-
-func (nv *nullableVersion) convert() *comusic.Version {
-	return &comusic.Version{
-		Meta: &comusic.Meta{
-			ID:        nv.ID.String,
-			CreatedAt: nv.CreatedAt.Time,
-			UpdatedAt: nv.CreatedAt.Time,
-		},
-		SongID: nv.SongID.String,
-		Name:   nv.Name.String,
-	}
-}
-
 func (r *SongRepository) FilterByStudioIDWithVersions(studioID string) (comusic.SongVerMap, error) {
 	dict := make(comusic.SongVerMap)
-	rows, err := r.Query(
-		`SELECT
-		 songs.id, songs.studio_id, songs.created_at, songs.updated_at, songs.name,
-		 vers.id, vers.song_id, vers.created_at, vers.updated_at, vers.name
-		 FROM songs
-		 LEFT OUTER JOIN versions AS vers ON songs.id = vers.song_id
-		 WHERE songs.studio_id = ?`,
+	rows, err := r.Query(`
+		SELECT songs.id, songs.studio_id, songs.created_at, songs.updated_at, songs.name,
+		COALESCE(vers.id, ''),
+		COALESCE(vers.song_id, ''),
+		COALESCE(vers.created_at, NOW()),
+		COALESCE(vers.updated_at, NOW()),
+		COALESCE(vers.name, '')
+		FROM songs
+		LEFT OUTER JOIN versions AS vers ON songs.id = vers.song_id
+		WHERE songs.studio_id = ?`,
 		studioID,
 	)
 	if err != nil {
@@ -70,7 +47,7 @@ func (r *SongRepository) FilterByStudioIDWithVersions(studioID string) (comusic.
 	}
 	for rows.Next() {
 		s := &comusic.Song{Meta: &comusic.Meta{}}
-		v := &nullableVersion{}
+		v := &comusic.Version{Meta: &comusic.Meta{}}
 		err := rows.Scan(
 			&s.ID, &s.StudioID, &s.CreatedAt, &s.UpdatedAt, &s.Name,
 			&v.ID, &v.SongID, &v.CreatedAt, &v.UpdatedAt, &v.Name,
@@ -82,12 +59,12 @@ func (r *SongRepository) FilterByStudioIDWithVersions(studioID string) (comusic.
 			dict[s.ID] = &comusic.SongVer{
 				Data: s,
 			}
-			if v.valid() {
-				dict[s.ID].Versions = []*comusic.Version{v.convert()}
+			if v.ID != "" {
+				dict[s.ID].Versions = []*comusic.Version{v}
 			}
 		} else {
-			if v.valid() {
-				val.Versions = append(val.Versions, v.convert())
+			if v.ID != "" {
+				val.Versions = append(val.Versions, v)
 			}
 		}
 	}

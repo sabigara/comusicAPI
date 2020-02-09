@@ -12,6 +12,9 @@ var profHandler *ProfileHandler
 var studioHandler *StudioHandler
 var songHandler *SongHandler
 var verHandler *VersionHandler
+var trackHandler *TrackHandler
+var takeHandler *TakeHandler
+
 var authenticate func(...interface{}) (*comusic.User, error)
 
 // SetHandlers sets all handlers with their all dependencies injected.
@@ -20,11 +23,15 @@ func SetHandlers(
 	studio *StudioHandler,
 	song *SongHandler,
 	ver *VersionHandler,
+	track *TrackHandler,
+	take *TakeHandler,
 ) {
 	profHandler = prof
 	studioHandler = studio
 	songHandler = song
 	verHandler = ver
+	trackHandler = track
+	takeHandler = take
 }
 
 func SetAuthenticate(f func(...interface{}) (*comusic.User, error)) {
@@ -88,6 +95,11 @@ func Start(addr string, debug bool) {
 	e.GET("songs", songHandler.get)
 
 	e.POST("versions", verHandler.create)
+
+	e.POST("tracks", trackHandler.create)
+	e.GET("tracks", trackHandler.get)
+
+	e.POST("takes", takeHandler.create)
 
 	e.Logger.Fatal(e.Start(addr))
 }
