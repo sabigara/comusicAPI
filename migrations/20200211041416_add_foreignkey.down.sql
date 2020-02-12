@@ -1,0 +1,21 @@
+START TRANSACTION;
+
+ALTER TABLE songs
+DROP FOREIGN KEY fk_studio_id;
+
+ALTER TABLE takes
+DROP FOREIGN KEY fk_track_id;
+
+ALTER TABLE tracks
+DROP FOREIGN KEY fk_version_id;
+
+ALTER TABLE tracks
+DROP FOREIGN KEY fk_active_take;
+
+ALTER TABLE tracks
+MODIFY active_take VARCHAR(50) NOT NULL;
+
+ALTER TABLE versions
+DROP FOREIGN KEY fk_song_id;
+
+COMMIT;

@@ -1,0 +1,31 @@
+START TRANSACTION;
+
+ALTER TABLE songs
+ADD CONSTRAINT fk_studio_id
+FOREIGN KEY (studio_id) REFERENCES studios (id)
+ON DELETE CASCADE;
+
+ALTER TABLE takes
+ADD CONSTRAINT fk_track_id
+FOREIGN KEY (track_id) REFERENCES tracks (id)
+ON DELETE CASCADE;
+
+ALTER TABLE tracks
+ADD CONSTRAINT fk_version_id
+FOREIGN KEY (version_id) REFERENCES versions (id)
+ON DELETE CASCADE;
+
+ALTER TABLE tracks
+MODIFY active_take VARCHAR(50);
+
+ALTER TABLE tracks
+ADD CONSTRAINT fk_active_take
+FOREIGN KEY (active_take) REFERENCES takes (id)
+ON DELETE SET NULL;
+
+ALTER TABLE versions
+ADD CONSTRAINT fk_song_id
+FOREIGN KEY (song_id) REFERENCES songs (id)
+ON DELETE CASCADE;
+
+COMMIT;

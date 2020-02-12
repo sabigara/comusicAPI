@@ -27,6 +27,10 @@ migrate-up:
 migrate-down:
 	@migrate -path ./migrations -database $${DSN} down $(n)
 
+.PHONY: migrate-force
+migrate-force:
+	@migrate -path ./migrations -database $${DSN} force $(ver)
+
 .PHONY: fmt
 fmt:
 	@go fmt
