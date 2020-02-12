@@ -21,9 +21,12 @@ type TakeCreateData struct {
 
 func (h *TakeHandler) create(c echo.Context) error {
 	trackID := c.QueryParam("track_id")
+	file, _ := c.FormFile("file")
+	src, _ := file.Open()
+	defer src.Close()
 	req := &TakeCreateData{}
 	c.Bind(req)
-	ver, err := h.TakeUsecase.Create(trackID, req.Name)
+	ver, err := h.TakeUsecase.Create(trackID, req.Name, src)
 	if err != nil {
 		return err
 	}

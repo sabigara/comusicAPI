@@ -1,0 +1,3 @@
+ALTER TABLE takes
+ADD COLUMN file_name VARCHAR(100) NOT NULL,
+ADD COLUMN file_url TEXT;

@@ -182,10 +182,8 @@ type TrackRepository interface {
 
 type Take struct {
 	*Meta
-	TrackID  string `json:"track_id"`
-	Name     string `json:"name"`
-	FileName string `json:"file_name"`
-	FileURL  string `json:"file_url"`
+	TrackID string `json:"track_id"`
+	Name    string `json:"name"`
 }
 
 func NewTake(trackID, name string) *Take {
@@ -197,9 +195,30 @@ func NewTake(trackID, name string) *Take {
 }
 
 type TakeUsecase interface {
-	Create(trackID, name string) (*Take, error)
+	Create(trackID, name string, src FileSrc) (*Take, error)
 }
 
 type TakeRepository interface {
 	Create(*Take) error
+}
+
+type File struct {
+	URL string  `json:"url"`
+	Src FileSrc `json:"-"`
+}
+
+type FileSrc interface {
+	Read(p []byte) (n int, err error)
+}
+
+func NewFile(url string, src FileSrc) *File {
+	return &File{
+		URL: url,
+		Src: src,
+	}
+}
+
+type FileRepository interface {
+	Upload(file *File) error
+	Download(url string) (*File, error)
 }

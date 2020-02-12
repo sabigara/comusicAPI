@@ -8,16 +8,23 @@ import (
 
 type TakeUsecase struct {
 	comusic.TakeRepository
+	comusic.FileRepository
 }
 
-func NewTakeUsecase(tr comusic.TakeRepository) *TakeUsecase {
-	return &TakeUsecase{TakeRepository: tr}
+func NewTakeUsecase(tr comusic.TakeRepository, fr comusic.FileRepository) *TakeUsecase {
+	return &TakeUsecase{
+		TakeRepository: tr,
+		FileRepository: fr,
+	}
 }
 
-func (su *TakeUsecase) Create(trackID, name string) (*comusic.Take, error) {
+func (tu *TakeUsecase) Create(trackID, name string, src comusic.FileSrc) (*comusic.Take, error) {
 	take := comusic.NewTake(trackID, name)
-	err := su.TakeRepository.Create(take)
-	if err != nil {
+	file := comusic.NewFile(take.ID, src)
+	if err := tu.FileRepository.Upload(file); err != nil {
+		return nil, fmt.Errorf("interactor.take_usecase.Create: %w", err)
+	}
+	if err := tu.TakeRepository.Create(take); err != nil {
 		return nil, fmt.Errorf("interactor.take_usecase.Create: %w", err)
 	}
 	return take, nil

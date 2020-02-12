@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"database/sql"
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -17,6 +18,11 @@ func NewTrackRepository(db *sqlx.DB) *TrackRepository {
 }
 
 func (r *TrackRepository) Create(t *comusic.Track) error {
+	// Set null if zero value
+	var activeTake *string = nil
+	if t.ActiveTake != "" {
+		activeTake = &t.ActiveTake
+	}
 	_, err := r.Exec(
 		`INSERT INTO tracks (
 			id, version_id, created_at, updated_at, name,
@@ -27,7 +33,7 @@ func (r *TrackRepository) Create(t *comusic.Track) error {
 			?, ?, ?, ?, ?
 		)`,
 		t.ID, t.VersionID, t.CreatedAt, t.UpdatedAt, t.Name,
-		t.Pan, t.IsMuted, t.IsSoloed, t.Icon, t.ActiveTake,
+		t.Pan, t.IsMuted, t.IsSoloed, t.Icon, activeTake,
 	)
 	if err != nil {
 		return fmt.Errorf("mysql.track_repository.Create: %w", err)
@@ -36,6 +42,7 @@ func (r *TrackRepository) Create(t *comusic.Track) error {
 }
 
 func (r *TrackRepository) FilterByVersionIDWithTakes(versionID string) (comusic.TrackTakeMap, error) {
+	var activeTake sql.NullString
 	dict := make(comusic.TrackTakeMap)
 	rows, err := r.Query(`
 		SELECT
@@ -59,11 +66,16 @@ func (r *TrackRepository) FilterByVersionIDWithTakes(versionID string) (comusic.
 		tk := &comusic.Take{Meta: &comusic.Meta{}}
 		err := rows.Scan(
 			&tr.ID, &tr.VersionID, &tr.CreatedAt, &tr.UpdatedAt, &tr.Name,
-			&tr.Pan, &tr.IsMuted, &tr.IsSoloed, &tr.Icon, &tr.ActiveTake,
+			&tr.Pan, &tr.IsMuted, &tr.IsSoloed, &tr.Icon, activeTake,
 			&tk.ID, &tk.TrackID, &tk.CreatedAt, &tk.UpdatedAt, &tk.Name,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("mysql.track_repository.FilterByStudioIDWithVersions: %w", err)
+		}
+		if activeTake.Valid {
+			tr.ActiveTake = activeTake.String
+		} else {
+			tr.ActiveTake = ""
 		}
 		if val, ok := dict[tr.ID]; !ok {
 			dict[tr.ID] = &comusic.TrackTake{

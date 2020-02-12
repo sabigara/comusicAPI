@@ -3,3 +3,4 @@
 .devcontainer
 /server
 docker-compose.dev.yaml
+/uploads

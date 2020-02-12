@@ -53,7 +53,8 @@ func inject() {
 	trackHandler := http.NewTrackHandler(trackUsecase)
 
 	takeRepository := mysql.NewTakeRepository(db)
-	takeUsecase := interactor.NewTakeUsecase(takeRepository)
+	fileRepository := mock.NewFileRepository()
+	takeUsecase := interactor.NewTakeUsecase(takeRepository, fileRepository)
 	takeHandler := http.NewTakeHandler(takeUsecase)
 
 	http.SetHandlers(
