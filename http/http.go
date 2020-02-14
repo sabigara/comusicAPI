@@ -11,9 +11,9 @@ import (
 
 type strKeyMap map[string]interface{}
 
-// Entity represents json response for query for
-// an object type, keeping order in all_ids while
-// having capability to select one by id.
+// Entity represents json response for a query for
+// an object type, keeping order in AllIds while
+// having capability to select one ByID.
 type Entity struct {
 	ByID   strKeyMap `json:"byId"`
 	AllIDs []string  `json:"allIds"`
@@ -118,9 +118,9 @@ func Start(addr string, debug bool) {
 	e.GET("songs", songHandler.get)
 
 	e.POST("versions", verHandler.create)
+	e.GET("versions/:id/contents", verHandler.get)
 
 	e.POST("tracks", trackHandler.create)
-	e.GET("tracks", trackHandler.get)
 
 	e.POST("takes", takeHandler.create)
 

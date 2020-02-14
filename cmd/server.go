@@ -45,13 +45,13 @@ func inject() {
 	songHandler := http.NewSongHandler(songUsecase)
 
 	verRepository := mysql.NewVersionRepository(db)
+	fileRepository := mock.NewFileRepository()
 	verUsecase := interactor.NewVersionUsecase(verRepository)
-	verHandler := http.NewVersionHandler(verUsecase)
+	verHandler := http.NewVersionHandler(verUsecase, fileRepository)
 
 	trackRepository := mysql.NewTrackRepository(db)
-	fileRepository := mock.NewFileRepository()
 	trackUsecase := interactor.NewTrackUsecase(trackRepository)
-	trackHandler := http.NewTrackHandler(trackUsecase, fileRepository)
+	trackHandler := http.NewTrackHandler(trackUsecase)
 
 	takeRepository := mysql.NewTakeRepository(db)
 	takeUsecase := interactor.NewTakeUsecase(

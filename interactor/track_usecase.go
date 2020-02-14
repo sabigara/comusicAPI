@@ -38,11 +38,3 @@ func (tu *TrackUsecase) Update(in *comusic.TrackUpdateInput) error {
 	}
 	return nil
 }
-
-func (tu *TrackUsecase) FilterByVersionIDWithTakes(verID string) (comusic.TrackTakeMap, error) {
-	trackTakeMap, err := tu.TrackRepository.FilterByVersionIDWithTakes(verID)
-	if err != nil {
-		return nil, fmt.Errorf("interactor.track_usecase.FilterByStudioIDWithVersions: %w", err)
-	}
-	return trackTakeMap, nil
-}

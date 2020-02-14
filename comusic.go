@@ -131,10 +131,12 @@ func NewVersion(songID, name string) *Version {
 
 type VersionUsecase interface {
 	Create(songID, name string) (*Version, error)
+	GetContents(verID string) ([]*Track, []*Take, error)
 }
 
 type VersionRepository interface {
 	Create(*Version) error
+	GetContents(verID string) ([]*Track, []*Take, error)
 }
 
 type Track struct {
@@ -188,14 +190,12 @@ type TrackUsecase interface {
 	Create(verID, name string) (*Track, error)
 	GetByID(id string) (*Track, error)
 	Update(*TrackUpdateInput) error
-	FilterByVersionIDWithTakes(verID string) (TrackTakeMap, error)
 }
 
 type TrackRepository interface {
 	Create(*Track) error
 	GetByID(id string) (*Track, error)
 	Update(*TrackUpdateInput) error
-	FilterByVersionIDWithTakes(verID string) (TrackTakeMap, error)
 }
 
 type Take struct {

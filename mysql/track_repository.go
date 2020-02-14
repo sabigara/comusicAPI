@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"database/sql"
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -75,57 +74,4 @@ func (r *TrackRepository) Update(in *comusic.TrackUpdateInput) error {
 		return fmt.Errorf("mysql.track_repository.Update: %w", err)
 	}
 	return nil
-}
-
-func (r *TrackRepository) FilterByVersionIDWithTakes(versionID string) (comusic.TrackTakeMap, error) {
-	var activeTake sql.NullString
-	dict := make(comusic.TrackTakeMap)
-	rows, err := r.Query(`
-		SELECT
-		tr.id, tr.version_id, tr.created_at, tr.updated_at, tr.name,
-		tr.volume, tr.pan, tr.is_muted, tr.is_soloed, tr.icon, tr.active_take,
-			COALESCE(takes.id, ''),
-			COALESCE(takes.track_id, ''),
-			COALESCE(takes.file_id, ''),
-			COALESCE(takes.created_at, NOW()),
-			COALESCE(takes.updated_at, NOW()),
-			COALESCE(takes.name, '')
-		FROM tracks as tr
-		LEFT OUTER JOIN takes ON tr.id = takes.track_id
-		WHERE tr.version_id = ?`,
-		versionID,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("mysql.track_repository.FilterByStudioIDWithVersions: %w", err)
-	}
-	for rows.Next() {
-		tr := &comusic.Track{Meta: &comusic.Meta{}}
-		tk := &comusic.Take{Meta: &comusic.Meta{}}
-		err := rows.Scan(
-			&tr.ID, &tr.VersionID, &tr.CreatedAt, &tr.UpdatedAt, &tr.Name,
-			&tr.Volume, &tr.Pan, &tr.IsMuted, &tr.IsSoloed, &tr.Icon, &activeTake,
-			&tk.ID, &tk.TrackID, &tk.FileID, &tk.CreatedAt, &tk.UpdatedAt, &tk.Name,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("mysql.track_repository.FilterByStudioIDWithVersions: %w", err)
-		}
-		if activeTake.Valid {
-			tr.ActiveTake = activeTake.String
-		} else {
-			tr.ActiveTake = ""
-		}
-		if val, ok := dict[tr.ID]; !ok {
-			dict[tr.ID] = &comusic.TrackTake{
-				Data: tr,
-			}
-			if tk.ID != "" {
-				dict[tr.ID].Takes = []*comusic.Take{tk}
-			}
-		} else {
-			if tk.ID != "" {
-				val.Takes = append(val.Takes, tk)
-			}
-		}
-	}
-	return dict, nil
 }
