@@ -23,6 +23,22 @@ func (tu *TrackUsecase) Create(verID, name string) (*comusic.Track, error) {
 	return track, nil
 }
 
+func (tu *TrackUsecase) GetByID(id string) (*comusic.Track, error) {
+	tr, err := tu.TrackRepository.GetByID(id)
+	if err != nil {
+		return nil, fmt.Errorf("interactor.track_usecase.GetByID: %w", err)
+	}
+	return tr, nil
+}
+
+func (tu *TrackUsecase) Update(in *comusic.TrackUpdateInput) error {
+	err := tu.TrackRepository.Update(in)
+	if err != nil {
+		return fmt.Errorf("interactor.track_usecase.Update: %w", err)
+	}
+	return nil
+}
+
 func (tu *TrackUsecase) FilterByVersionIDWithTakes(verID string) (comusic.TrackTakeMap, error) {
 	trackTakeMap, err := tu.TrackRepository.FilterByVersionIDWithTakes(verID)
 	if err != nil {

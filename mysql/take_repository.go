@@ -19,12 +19,12 @@ func NewTakeRepository(db *sqlx.DB) *TakeRepository {
 func (r *TakeRepository) Create(take *comusic.Take) error {
 	_, err := r.Exec(`
 		INSERT INTO takes (
-			id, track_id, created_at, updated_at, name
+			id, track_id, file_id, created_at, updated_at, name
 		)
 		VALUES (
-			?, ?, ?, ?, ?
+			?, ?, ?, ?, ?, ?
 		)`,
-		take.ID, take.TrackID, take.CreatedAt, take.UpdatedAt, take.Name,
+		take.ID, take.TrackID, take.FileID, take.CreatedAt, take.UpdatedAt, take.Name,
 	)
 	if err != nil {
 		return fmt.Errorf("mysql.take_repository.Create: %w", err)

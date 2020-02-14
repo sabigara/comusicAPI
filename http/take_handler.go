@@ -21,14 +21,27 @@ type TakeCreateData struct {
 
 func (h *TakeHandler) create(c echo.Context) error {
 	trackID := c.QueryParam("track_id")
-	file, _ := c.FormFile("file")
-	src, _ := file.Open()
-	defer src.Close()
-	req := &TakeCreateData{}
-	c.Bind(req)
-	ver, err := h.TakeUsecase.Create(trackID, req.Name, src)
+	form, err := c.MultipartForm()
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusCreated, ver)
+	file := form.File["file"]
+	if len(file) != 1 {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	name := c.FormValue("name")
+	src, err := file[0].Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+	take, uploadedFile, err := h.TakeUsecase.Create(trackID, name, src)
+	if err != nil {
+		return err
+	}
+	ret := map[string]interface{}{
+		"take": take,
+		"file": uploadedFile,
+	}
+	return c.JSON(http.StatusCreated, ret)
 }

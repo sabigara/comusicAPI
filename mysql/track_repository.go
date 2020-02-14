@@ -26,17 +26,53 @@ func (r *TrackRepository) Create(t *comusic.Track) error {
 	_, err := r.Exec(
 		`INSERT INTO tracks (
 			id, version_id, created_at, updated_at, name,
-			pan, is_muted, is_soloed, icon, active_take
+			volume, pan, is_muted, is_soloed, icon, active_take
 		)
 		VALUES (
 			?, ?, ?, ?, ?, 
-			?, ?, ?, ?, ?
+			?, ?, ?, ?, ?, ?
 		)`,
 		t.ID, t.VersionID, t.CreatedAt, t.UpdatedAt, t.Name,
-		t.Pan, t.IsMuted, t.IsSoloed, t.Icon, activeTake,
+		t.Volume, t.Pan, t.IsMuted, t.IsSoloed, t.Icon, activeTake,
 	)
 	if err != nil {
 		return fmt.Errorf("mysql.track_repository.Create: %w", err)
+	}
+	return nil
+}
+
+func (r *TrackRepository) GetByID(id string) (*comusic.Track, error) {
+	tr := &comusic.Track{}
+	err := r.DB.Get(
+		tr,
+		`SELECT * FROM tracks WHERE id = ?`,
+		id,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("mysql.track_repository.GetByID: %w", err)
+	}
+	return tr, nil
+}
+
+func (r *TrackRepository) Update(in *comusic.TrackUpdateInput) error {
+	_, err := r.Exec(`
+		UPDATE tracks SET
+		updated_at = ?,
+		version_id = COALESCE(?, version_id),
+		active_take = COALESCE(?, active_take),
+		name = COALESCE(?, name),
+		volume = COALESCE(?, volume),
+		pan = COALESCE(?, pan),
+		is_muted = COALESCE(?, is_muted),
+		is_soloed = COALESCE(?, is_soloed),
+		icon = COALESCE(?, icon)
+		WHERE id = ?`,
+		in.UpdatedAt, in.VerID, in.ActiveTake, in.Name,
+		in.Vol, in.Pan, in.IsMuted, in.IsSoloed, in.Icon,
+		in.ID,
+	)
+	if err != nil {
+		return fmt.Errorf("mysql.track_repository.Update: %w", err)
 	}
 	return nil
 }
@@ -47,9 +83,10 @@ func (r *TrackRepository) FilterByVersionIDWithTakes(versionID string) (comusic.
 	rows, err := r.Query(`
 		SELECT
 		tr.id, tr.version_id, tr.created_at, tr.updated_at, tr.name,
-		tr.pan, tr.is_muted, tr.is_soloed, tr.icon, tr.active_take,
+		tr.volume, tr.pan, tr.is_muted, tr.is_soloed, tr.icon, tr.active_take,
 			COALESCE(takes.id, ''),
 			COALESCE(takes.track_id, ''),
+			COALESCE(takes.file_id, ''),
 			COALESCE(takes.created_at, NOW()),
 			COALESCE(takes.updated_at, NOW()),
 			COALESCE(takes.name, '')
@@ -66,8 +103,8 @@ func (r *TrackRepository) FilterByVersionIDWithTakes(versionID string) (comusic.
 		tk := &comusic.Take{Meta: &comusic.Meta{}}
 		err := rows.Scan(
 			&tr.ID, &tr.VersionID, &tr.CreatedAt, &tr.UpdatedAt, &tr.Name,
-			&tr.Pan, &tr.IsMuted, &tr.IsSoloed, &tr.Icon, activeTake,
-			&tk.ID, &tk.TrackID, &tk.CreatedAt, &tk.UpdatedAt, &tk.Name,
+			&tr.Volume, &tr.Pan, &tr.IsMuted, &tr.IsSoloed, &tr.Icon, &activeTake,
+			&tk.ID, &tk.TrackID, &tk.FileID, &tk.CreatedAt, &tk.UpdatedAt, &tk.Name,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("mysql.track_repository.FilterByStudioIDWithVersions: %w", err)

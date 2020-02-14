@@ -8,8 +8,8 @@ import (
 
 type Meta struct {
 	ID        string    `json:"id" db:"id"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+	CreatedAt time.Time `json:"createdAt" db:"created_at"`
+	UpdatedAt time.Time `json:"updatedAt" db:"updated_at"`
 }
 
 func NewMeta() *Meta {
@@ -34,7 +34,7 @@ func NewUser(id, displayName, email string) *User {
 
 type Profile struct {
 	*Meta
-	UserID   string `json:"user_id" db:"user_id"`
+	UserID   string `json:"user_id" db:"userId"`
 	Nickname string `json:"nickname" db:"nickname"`
 	Bio      string `json:"bio" db:"bio"`
 }
@@ -62,7 +62,7 @@ type ProfileRepository interface {
 
 type Studio struct {
 	*Meta
-	OwnerID string `json:"owner_id" db:"owner_id"`
+	OwnerID string `json:"owner_id" db:"ownerId"`
 	Name    string `json:"name" db:"name"`
 }
 
@@ -86,7 +86,7 @@ type StudioRepository interface {
 
 type Song struct {
 	*Meta
-	StudioID string `json:"studio_id"`
+	StudioID string `json:"studioId"`
 	Name     string `json:"name"`
 }
 
@@ -117,7 +117,7 @@ type SongRepository interface {
 
 type Version struct {
 	*Meta
-	SongID string `json:"song_id"`
+	SongID string `json:"songId"`
 	Name   string `json:"name"`
 }
 
@@ -139,13 +139,14 @@ type VersionRepository interface {
 
 type Track struct {
 	*Meta
-	VersionID  string `json:"version_id"`
-	Name       string `json:"name"`
-	Pan        int    `json:"pan"`
-	IsMuted    bool   `json:"is_muted"`
-	IsSoloed   bool   `json:"is_soloed"`
-	Icon       int    `json:"icon"`
-	ActiveTake string `json:"active_take"`
+	VersionID  string  `json:"versionId"`
+	Name       string  `json:"name"`
+	Volume     float32 `json:"volume"`
+	Pan        float32 `json:"pan"`
+	IsMuted    bool    `json:"isMuted"`
+	IsSoloed   bool    `json:"isSoloed"`
+	Icon       int     `json:"icon"`
+	ActiveTake string  `json:"activeTake"`
 }
 
 func NewTrack(verID, name string) *Track {
@@ -153,6 +154,7 @@ func NewTrack(verID, name string) *Track {
 		Meta:      NewMeta(),
 		VersionID: verID,
 		Name:      name,
+		Volume:    0.7,
 	}
 }
 
@@ -169,21 +171,38 @@ type TrackTake struct {
 	Takes []*Take
 }
 type TrackTakeMap map[string]*TrackTake
+type TrackUpdateInput struct {
+	ID         string
+	UpdatedAt  time.Time
+	VerID      *string
+	ActiveTake *string
+	Name       *string
+	Vol        *float32
+	Pan        *float32
+	IsMuted    *bool
+	IsSoloed   *bool
+	Icon       *int
+}
 
 type TrackUsecase interface {
 	Create(verID, name string) (*Track, error)
+	GetByID(id string) (*Track, error)
+	Update(*TrackUpdateInput) error
 	FilterByVersionIDWithTakes(verID string) (TrackTakeMap, error)
 }
 
 type TrackRepository interface {
 	Create(*Track) error
+	GetByID(id string) (*Track, error)
+	Update(*TrackUpdateInput) error
 	FilterByVersionIDWithTakes(verID string) (TrackTakeMap, error)
 }
 
 type Take struct {
 	*Meta
-	TrackID string `json:"track_id"`
+	TrackID string `json:"trackId"`
 	Name    string `json:"name"`
+	FileID  string `json:"fileId"`
 }
 
 func NewTake(trackID, name string) *Take {
@@ -195,7 +214,7 @@ func NewTake(trackID, name string) *Take {
 }
 
 type TakeUsecase interface {
-	Create(trackID, name string, src FileSrc) (*Take, error)
+	Create(trackID, name string, src FileSrc) (*Take, *File, error)
 }
 
 type TakeRepository interface {
@@ -203,6 +222,7 @@ type TakeRepository interface {
 }
 
 type File struct {
+	*Meta
 	URL string  `json:"url"`
 	Src FileSrc `json:"-"`
 }
@@ -213,12 +233,13 @@ type FileSrc interface {
 
 func NewFile(url string, src FileSrc) *File {
 	return &File{
-		URL: url,
-		Src: src,
+		Meta: NewMeta(),
+		Src:  src,
 	}
 }
 
 type FileRepository interface {
-	Upload(file *File) error
+	Upload(file *File) (*File, error)
 	Download(url string) (*File, error)
+	URL(fileID string) string
 }

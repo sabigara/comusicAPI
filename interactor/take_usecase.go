@@ -2,30 +2,49 @@ package interactor
 
 import (
 	"fmt"
+	"time"
 
 	comusic "github.com/sabigara/comusicAPI"
 )
 
 type TakeUsecase struct {
+	comusic.TrackUsecase
 	comusic.TakeRepository
 	comusic.FileRepository
 }
 
-func NewTakeUsecase(tr comusic.TakeRepository, fr comusic.FileRepository) *TakeUsecase {
+func NewTakeUsecase(
+	tru comusic.TrackUsecase,
+	tr comusic.TakeRepository,
+	fr comusic.FileRepository,
+) *TakeUsecase {
 	return &TakeUsecase{
+		TrackUsecase:   tru,
 		TakeRepository: tr,
 		FileRepository: fr,
 	}
 }
 
-func (tu *TakeUsecase) Create(trackID, name string, src comusic.FileSrc) (*comusic.Take, error) {
+func (tu *TakeUsecase) Create(trackID, name string, src comusic.FileSrc) (*comusic.Take, *comusic.File, error) {
 	take := comusic.NewTake(trackID, name)
 	file := comusic.NewFile(take.ID, src)
-	if err := tu.FileRepository.Upload(file); err != nil {
-		return nil, fmt.Errorf("interactor.take_usecase.Create: %w", err)
+	take.FileID = file.ID
+	file, err := tu.FileRepository.Upload(file)
+	if err != nil {
+		return nil, nil, fmt.Errorf("interactor.take_usecase.Create: %w", err)
 	}
 	if err := tu.TakeRepository.Create(take); err != nil {
-		return nil, fmt.Errorf("interactor.take_usecase.Create: %w", err)
+		return nil, nil, fmt.Errorf("interactor.take_usecase.Create: %w", err)
 	}
-	return take, nil
+	err = tu.TrackUsecase.Update(
+		&comusic.TrackUpdateInput{
+			ID:         trackID,
+			UpdatedAt:  time.Now().UTC(),
+			ActiveTake: &take.ID,
+		},
+	)
+	if err != nil {
+		return nil, nil, fmt.Errorf("interactor.take_usecase.Create: %w", err)
+	}
+	return take, file, nil
 }

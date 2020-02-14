@@ -2,11 +2,29 @@ package http
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	comusic "github.com/sabigara/comusicAPI"
 )
+
+type strKeyMap map[string]interface{}
+
+// Entity represents json response for query for
+// an object type, keeping order in all_ids while
+// having capability to select one by id.
+type Entity struct {
+	ByID   strKeyMap `json:"byId"`
+	AllIDs []string  `json:"allIds"`
+}
+
+func NewEntity() *Entity {
+	return &Entity{
+		ByID:   strKeyMap{},
+		AllIDs: []string{},
+	}
+}
 
 var profHandler *ProfileHandler
 var studioHandler *StudioHandler
@@ -74,6 +92,11 @@ func Start(addr string, debug bool) {
 	e.HideBanner = true
 	if debug {
 		e.Debug = true
+		uploadsDir, ok := os.LookupEnv("UPLOADS_DIR")
+		if !ok {
+			panic("UPLOADS_DIR not specified")
+		}
+		e.Static("uploads", uploadsDir)
 	}
 	e.HTTPErrorHandler = errorHandler(e)
 
