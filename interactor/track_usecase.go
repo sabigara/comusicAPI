@@ -8,6 +8,7 @@ import (
 
 type TrackUsecase struct {
 	comusic.TrackRepository
+	comusic.TakeUsecase
 }
 
 func NewTrackUsecase(pr comusic.TrackRepository) *TrackUsecase {
@@ -35,6 +36,27 @@ func (tu *TrackUsecase) Update(in *comusic.TrackUpdateInput) error {
 	err := tu.TrackRepository.Update(in)
 	if err != nil {
 		return fmt.Errorf("interactor.track_usecase.Update: %w", err)
+	}
+	return nil
+}
+
+func (tu *TrackUsecase) Delete(id string) error {
+	errf := "interactor.track_usecase.Delete: %w"
+	track, err := tu.TrackRepository.GetByID(id)
+	if err != nil {
+		return fmt.Errorf(errf, err)
+	}
+	takes, err := tu.TakeUsecase.FilterByTrackID(track.ID)
+	if err != nil {
+		return fmt.Errorf(errf, err)
+	}
+	for _, tk := range takes {
+		if err := tu.TakeUsecase.Delete(tk.ID); err != nil {
+			return fmt.Errorf(errf, err)
+		}
+	}
+	if err := tu.TrackRepository.Delete(id); err != nil {
+		return fmt.Errorf(errf, err)
 	}
 	return nil
 }

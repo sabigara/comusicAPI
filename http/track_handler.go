@@ -29,3 +29,11 @@ func (h *TrackHandler) create(c echo.Context) error {
 	}
 	return c.JSON(http.StatusCreated, profile)
 }
+
+func (h *TrackHandler) delete(c echo.Context) error {
+	err := h.TrackUsecase.Delete(c.Param("id"))
+	if err != nil {
+		return err
+	}
+	return c.NoContent(http.StatusNoContent)
+}

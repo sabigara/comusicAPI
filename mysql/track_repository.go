@@ -75,3 +75,11 @@ func (r *TrackRepository) Update(in *comusic.TrackUpdateInput) error {
 	}
 	return nil
 }
+
+func (r *TrackRepository) Delete(id string) error {
+	_, err := r.Exec(`DELETE FROM tracks WHERE id = ?`, id)
+	if err != nil {
+		return fmt.Errorf("mysql.track_repository.Delete: %w", err)
+	}
+	return nil
+}

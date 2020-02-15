@@ -141,14 +141,14 @@ type VersionRepository interface {
 
 type Track struct {
 	*Meta
-	VersionID  string  `json:"versionId"`
-	Name       string  `json:"name"`
-	Volume     float32 `json:"volume"`
-	Pan        float32 `json:"pan"`
-	IsMuted    bool    `json:"isMuted"`
-	IsSoloed   bool    `json:"isSoloed"`
-	Icon       int     `json:"icon"`
-	ActiveTake string  `json:"activeTake"`
+	VersionID  string  `json:"versionId" db:"version_id"`
+	Name       string  `json:"name" db:"name"`
+	Volume     float32 `json:"volume" db:"volume"`
+	Pan        float32 `json:"pan" db:"pan"`
+	IsMuted    bool    `json:"isMuted" db:"is_muted"`
+	IsSoloed   bool    `json:"isSoloed" db:"is_soloed"`
+	Icon       int     `json:"icon" db:"icon"`
+	ActiveTake string  `json:"activeTake" db:"active_take"`
 }
 
 func NewTrack(verID, name string) *Track {
@@ -190,12 +190,14 @@ type TrackUsecase interface {
 	Create(verID, name string) (*Track, error)
 	GetByID(id string) (*Track, error)
 	Update(*TrackUpdateInput) error
+	Delete(id string) error
 }
 
 type TrackRepository interface {
 	Create(*Track) error
 	GetByID(id string) (*Track, error)
 	Update(*TrackUpdateInput) error
+	Delete(id string) error
 }
 
 type Take struct {
@@ -216,12 +218,14 @@ func NewTake(trackID, name string) *Take {
 type TakeUsecase interface {
 	Create(trackID, name string, src FileSrc) (*Take, *File, error)
 	GetByID(id string) (*Take, error)
+	FilterByTrackID(trackID string) ([]*Take, error)
 	Delete(takeId string) error
 }
 
 type TakeRepository interface {
 	Create(*Take) error
 	GetByID(id string) (*Take, error)
+	FilterByTrackID(trackID string) ([]*Take, error)
 	Delete(takeId string) error
 }
 

@@ -121,6 +121,7 @@ func Start(addr string, debug bool) {
 	e.GET("versions/:id/contents", verHandler.get)
 
 	e.POST("tracks", trackHandler.create)
+	e.DELETE("tracks/:id", trackHandler.delete)
 
 	e.POST("takes", takeHandler.create)
 	e.DELETE("takes/:id", takeHandler.delete)

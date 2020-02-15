@@ -57,6 +57,14 @@ func (tu *TakeUsecase) GetByID(id string) (*comusic.Take, error) {
 	return tr, nil
 }
 
+func (tu *TakeUsecase) FilterByTrackID(trackID string) ([]*comusic.Take, error) {
+	takes, err := tu.TakeRepository.FilterByTrackID(trackID)
+	if err != nil {
+		return nil, fmt.Errorf("interactor.take_usecase.FilterByTrackID: %w", err)
+	}
+	return takes, nil
+}
+
 func (tu *TakeUsecase) Delete(takeID string) error {
 	tk, err := tu.GetByID(takeID)
 	if err != nil {

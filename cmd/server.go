@@ -50,8 +50,9 @@ func inject() {
 	verHandler := http.NewVersionHandler(verUsecase, fileRepository)
 
 	trackRepository := mysql.NewTrackRepository(db)
-	trackUsecase := interactor.NewTrackUsecase(trackRepository)
-	trackHandler := http.NewTrackHandler(trackUsecase)
+	trackUsecase := &interactor.TrackUsecase{TrackRepository: trackRepository}
+	// Skip creating TrackHandler, because TrackUsecase needs TakeUsecase
+	// which also refers to TrackUsecase.
 
 	takeRepository := mysql.NewTakeRepository(db)
 	takeUsecase := interactor.NewTakeUsecase(
@@ -60,6 +61,10 @@ func inject() {
 		fileRepository,
 	)
 	takeHandler := http.NewTakeHandler(takeUsecase, fileRepository)
+
+	// Inject TakeUsecase to TrackUsecase here to avoid circular reference.
+	trackUsecase.TakeUsecase = takeUsecase
+	trackHandler := http.NewTrackHandler(trackUsecase)
 
 	http.SetHandlers(
 		profileHandler,

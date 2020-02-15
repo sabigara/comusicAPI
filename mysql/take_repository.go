@@ -33,16 +33,29 @@ func (r *TakeRepository) Create(take *comusic.Take) error {
 }
 
 func (r *TakeRepository) GetByID(id string) (*comusic.Take, error) {
-	tr := &comusic.Take{}
+	tk := &comusic.Take{}
 	err := r.DB.Get(
-		tr,
+		tk,
 		`SELECT * FROM takes WHERE id = ?`,
 		id,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("mysql.take_repository.GetByID: %w", err)
 	}
-	return tr, nil
+	return tk, nil
+}
+
+func (r *TakeRepository) FilterByTrackID(trackID string) ([]*comusic.Take, error) {
+	takes := &[]*comusic.Take{}
+	err := r.DB.Select(
+		takes,
+		`SELECT * FROM takes WHERE track_id = ?`,
+		trackID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("mysql.take_repository.FilterByTrackID: %w", err)
+	}
+	return *takes, nil
 }
 
 func (r *TakeRepository) Delete(takeID string) error {
