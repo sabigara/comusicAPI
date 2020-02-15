@@ -36,6 +36,10 @@ func (r *FileRepository) Download(url string) (*comusic.File, error) {
 	return nil, nil
 }
 
+func (r *FileRepository) Delete(id string) error {
+	return os.Remove(filepath.Join(UPLOADS_DIR, id))
+}
+
 func (r *FileRepository) URL(fileID string) string {
 	return UPLOADS_PATH + "/" + fileID
 }

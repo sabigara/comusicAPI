@@ -31,3 +31,24 @@ func (r *TakeRepository) Create(take *comusic.Take) error {
 	}
 	return nil
 }
+
+func (r *TakeRepository) GetByID(id string) (*comusic.Take, error) {
+	tr := &comusic.Take{}
+	err := r.DB.Get(
+		tr,
+		`SELECT * FROM takes WHERE id = ?`,
+		id,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("mysql.take_repository.GetByID: %w", err)
+	}
+	return tr, nil
+}
+
+func (r *TakeRepository) Delete(takeID string) error {
+	_, err := r.Exec(`DELETE FROM takes WHERE id = ?`, takeID)
+	if err != nil {
+		return fmt.Errorf("mysql.take_repository.Delete: %w", err)
+	}
+	return nil
+}

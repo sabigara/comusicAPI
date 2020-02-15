@@ -9,10 +9,11 @@ import (
 
 type TakeHandler struct {
 	comusic.TakeUsecase
+	comusic.FileRepository
 }
 
-func NewTakeHandler(takeUsecase comusic.TakeUsecase) *TakeHandler {
-	return &TakeHandler{TakeUsecase: takeUsecase}
+func NewTakeHandler(tu comusic.TakeUsecase, fr comusic.FileRepository) *TakeHandler {
+	return &TakeHandler{TakeUsecase: tu, FileRepository: fr}
 }
 
 type TakeCreateData struct {
@@ -44,4 +45,12 @@ func (h *TakeHandler) create(c echo.Context) error {
 		"file": uploadedFile,
 	}
 	return c.JSON(http.StatusCreated, ret)
+}
+
+func (h *TakeHandler) delete(c echo.Context) error {
+	err := h.TakeUsecase.Delete(c.Param("id"))
+	if err != nil {
+		return err
+	}
+	return c.NoContent(http.StatusNoContent)
 }

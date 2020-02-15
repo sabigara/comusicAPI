@@ -59,7 +59,7 @@ func inject() {
 		takeRepository,
 		fileRepository,
 	)
-	takeHandler := http.NewTakeHandler(takeUsecase)
+	takeHandler := http.NewTakeHandler(takeUsecase, fileRepository)
 
 	http.SetHandlers(
 		profileHandler,

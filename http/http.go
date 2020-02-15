@@ -123,6 +123,7 @@ func Start(addr string, debug bool) {
 	e.POST("tracks", trackHandler.create)
 
 	e.POST("takes", takeHandler.create)
+	e.DELETE("takes/:id", takeHandler.delete)
 
 	e.Logger.Fatal(e.Start(addr))
 }
