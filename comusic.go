@@ -34,7 +34,7 @@ func NewUser(id, displayName, email string) *User {
 
 type Profile struct {
 	*Meta
-	UserID   string `json:"user_id" db:"userId"`
+	UserID   string `json:"userId" db:"user_id"`
 	Nickname string `json:"nickname" db:"nickname"`
 	Bio      string `json:"bio" db:"bio"`
 }
@@ -62,7 +62,7 @@ type ProfileRepository interface {
 
 type Studio struct {
 	*Meta
-	OwnerID string `json:"owner_id" db:"ownerId"`
+	OwnerID string `json:"ownerId" db:"owner_id"`
 	Name    string `json:"name" db:"name"`
 }
 
@@ -86,8 +86,8 @@ type StudioRepository interface {
 
 type Song struct {
 	*Meta
-	StudioID string `json:"studioId"`
-	Name     string `json:"name"`
+	StudioID string `json:"studioId" db:"studio_id"`
+	Name     string `json:"name" db:"name"`
 }
 
 func NewSong(studioID, name string) *Song {
@@ -117,8 +117,8 @@ type SongRepository interface {
 
 type Version struct {
 	*Meta
-	SongID string `json:"songId"`
-	Name   string `json:"name"`
+	SongID string `json:"songId" db:"song_id"`
+	Name   string `json:"name" db:"name"`
 }
 
 func NewVersion(songID, name string) *Version {
