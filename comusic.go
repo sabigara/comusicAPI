@@ -104,17 +104,13 @@ type SongVer struct {
 	Data     *Song
 	Versions []*Version
 }
-type SongVerMap map[string]*SongVer
 
 type SongUsecase interface {
 	Create(studioID, name string) (*Song, error)
-	FilterByStudioIDWithVersions(studioID string) (SongVerMap, error)
 }
 
 type SongRepository interface {
 	Create(*Song) error
-	// Prefetch versions
-	FilterByStudioIDWithVersions(studioID string) (SongVerMap, error)
 }
 
 type Version struct {

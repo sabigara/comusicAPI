@@ -46,8 +46,8 @@ func inject() {
 
 	verRepository := mysql.NewVersionRepository(db)
 	fileRepository := mock.NewFileRepository()
-	verUsecase := interactor.NewVersionUsecase(verRepository)
-	verHandler := http.NewVersionHandler(verUsecase, fileRepository)
+	verUsecase := interactor.NewVersionUsecase(verRepository, fileRepository)
+	verHandler := http.NewVersionHandler(verUsecase)
 
 	trackRepository := mysql.NewTrackRepository(db)
 	trackUsecase := &interactor.TrackUsecase{TrackRepository: trackRepository}

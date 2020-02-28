@@ -29,11 +29,3 @@ func (h *SongHandler) create(c echo.Context) error {
 	}
 	return c.JSON(http.StatusCreated, profile)
 }
-
-func (h *SongHandler) get(c echo.Context) error {
-	songVersMap, err := h.FilterByStudioIDWithVersions(c.QueryParam("studio_id"))
-	if err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, songVersMap)
-}

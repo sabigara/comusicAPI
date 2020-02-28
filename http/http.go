@@ -126,9 +126,9 @@ func Start(addr string, debug bool) {
 
 	e.GET("studios", studioHandler.get)
 	e.POST("studios", studioHandler.create)
+	e.GET("studios/:id/contents", studioHandler.getContents)
 
 	e.POST("songs", songHandler.create)
-	e.GET("songs", songHandler.get)
 
 	e.POST("versions", verHandler.create)
 	e.GET("versions/:id/contents", verHandler.get)
