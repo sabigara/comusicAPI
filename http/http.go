@@ -129,9 +129,11 @@ func Start(addr string, debug bool) {
 	e.GET("studios/:id/contents", studioHandler.getContents)
 
 	e.POST("songs", songHandler.create)
+	e.DELETE("songs/:id", songHandler.delete)
 
 	e.POST("versions", verHandler.create)
 	e.GET("versions/:id/contents", verHandler.get)
+	e.DELETE("versions/:id", verHandler.delete)
 
 	e.POST("tracks", trackHandler.create)
 	e.DELETE("tracks/:id", trackHandler.delete)

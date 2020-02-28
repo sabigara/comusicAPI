@@ -102,10 +102,12 @@ func NewSong(studioID, name string) *Song {
 
 type SongUsecase interface {
 	Create(studioID, name string) (*Song, error)
+	Delete(songID string) error
 }
 
 type SongRepository interface {
 	Create(*Song) error
+	Delete(songID string) error
 }
 
 type Version struct {
@@ -124,11 +126,13 @@ func NewVersion(songID, name string) *Version {
 
 type VersionUsecase interface {
 	Create(songID, name string) (*Version, error)
+	Delete(verId string) error
 	GetContents(verID string) ([]*Track, []*Take, []*File, error)
 }
 
 type VersionRepository interface {
 	Create(*Version) error
+	Delete(verId string) error
 	GetContents(verID string) ([]*Track, []*Take, error)
 }
 

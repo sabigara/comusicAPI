@@ -29,3 +29,11 @@ func (h *SongHandler) create(c echo.Context) error {
 	}
 	return c.JSON(http.StatusCreated, profile)
 }
+
+func (h *SongHandler) delete(c echo.Context) error {
+	err := h.SongUsecase.Delete(c.Param("id"))
+	if err != nil {
+		return err
+	}
+	return c.NoContent(http.StatusNoContent)
+}

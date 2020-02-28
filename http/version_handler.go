@@ -30,6 +30,14 @@ func (h *VersionHandler) create(c echo.Context) error {
 	return c.JSON(http.StatusCreated, ver)
 }
 
+func (h *VersionHandler) delete(c echo.Context) error {
+	err := h.VersionUsecase.Delete(c.Param("id"))
+	if err != nil {
+		return err
+	}
+	return c.NoContent(http.StatusNoContent)
+}
+
 type VersionContents struct {
 	Tracks *RespEntity `json:"tracks"`
 	Takes  *RespEntity `json:"takes"`

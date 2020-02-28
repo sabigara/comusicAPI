@@ -24,6 +24,14 @@ func (u *VersionUsecase) Create(songID, nickname string) (*comusic.Version, erro
 	return version, nil
 }
 
+func (u *VersionUsecase) Delete(verID string) error {
+	err := u.VersionRepository.Delete(verID)
+	if err != nil {
+		return fmt.Errorf("interactor.version_usecase.Create: %w", err)
+	}
+	return nil
+}
+
 func (u *VersionUsecase) GetContents(verID string) ([]*comusic.Track, []*comusic.Take, []*comusic.File, error) {
 	tracks, takes, err := u.VersionRepository.GetContents(verID)
 	if err != nil {

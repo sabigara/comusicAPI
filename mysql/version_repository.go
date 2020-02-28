@@ -29,6 +29,14 @@ func (r *VersionRepository) Create(version *comusic.Version) error {
 	return nil
 }
 
+func (r *VersionRepository) Delete(verID string) error {
+	_, err := r.Exec(`DELETE FROM versions WHERE id = ?`, verID)
+	if err != nil {
+		return fmt.Errorf("mysql.version_repository.Delete: %w", err)
+	}
+	return nil
+}
+
 func (r *VersionRepository) GetContents(versionID string) ([]*comusic.Track, []*comusic.Take, error) {
 	// tracks.active_take is nullable
 	var activeTake sql.NullString

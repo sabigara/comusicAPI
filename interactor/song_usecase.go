@@ -22,3 +22,11 @@ func (u *SongUsecase) Create(studioID, nickname string) (*comusic.Song, error) {
 	}
 	return song, nil
 }
+
+func (u *SongUsecase) Delete(songID string) error {
+	err := u.SongRepository.Delete(songID)
+	if err != nil {
+		return fmt.Errorf("interactor.song_usecase.Delete: %w", err)
+	}
+	return nil
+}
