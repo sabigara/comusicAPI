@@ -14,9 +14,9 @@ func NewSongUsecase(pr comusic.SongRepository) *SongUsecase {
 	return &SongUsecase{SongRepository: pr}
 }
 
-func (su *SongUsecase) Create(studioID, nickname string) (*comusic.Song, error) {
+func (u *SongUsecase) Create(studioID, nickname string) (*comusic.Song, error) {
 	song := comusic.NewSong(studioID, nickname)
-	err := su.SongRepository.Create(song)
+	err := u.SongRepository.Create(song)
 	if err != nil {
 		return nil, fmt.Errorf("interactor.song_usecase.Create: %w", err)
 	}

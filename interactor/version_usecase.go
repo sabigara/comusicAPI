@@ -15,17 +15,17 @@ func NewVersionUsecase(pr comusic.VersionRepository, fr comusic.FileRepository) 
 	return &VersionUsecase{VersionRepository: pr, FileRepository: fr}
 }
 
-func (su *VersionUsecase) Create(songID, nickname string) (*comusic.Version, error) {
+func (u *VersionUsecase) Create(songID, nickname string) (*comusic.Version, error) {
 	version := comusic.NewVersion(songID, nickname)
-	err := su.VersionRepository.Create(version)
+	err := u.VersionRepository.Create(version)
 	if err != nil {
 		return nil, fmt.Errorf("interactor.version_usecase.Create: %w", err)
 	}
 	return version, nil
 }
 
-func (tu *VersionUsecase) GetContents(verID string) ([]*comusic.Track, []*comusic.Take, []*comusic.File, error) {
-	tracks, takes, err := tu.VersionRepository.GetContents(verID)
+func (u *VersionUsecase) GetContents(verID string) ([]*comusic.Track, []*comusic.Take, []*comusic.File, error) {
+	tracks, takes, err := u.VersionRepository.GetContents(verID)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("interactor.track_usecase.FilterByStudioIDWithVersions: %w", err)
 	}
@@ -35,7 +35,7 @@ func (tu *VersionUsecase) GetContents(verID string) ([]*comusic.Track, []*comusi
 			Meta: &comusic.Meta{
 				ID: tk.FileID,
 			},
-			URL: tu.FileRepository.URL(tk.FileID),
+			URL: u.FileRepository.URL(tk.FileID),
 		})
 	}
 	return tracks, takes, files, nil
