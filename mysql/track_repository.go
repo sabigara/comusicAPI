@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"database/sql"
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -41,14 +42,25 @@ func (r *TrackRepository) Create(t *comusic.Track) error {
 }
 
 func (r *TrackRepository) GetByID(id string) (*comusic.Track, error) {
-	tr := &comusic.Track{}
-	err := r.DB.Get(
-		tr,
-		`SELECT * FROM tracks WHERE id = ?`,
+	tr := &comusic.Track{Meta: &comusic.Meta{}}
+	active_take := &sql.NullString{}
+	row := r.DB.QueryRow(
+		`SELECT id, version_id, active_take, created_at, updated_at, name,
+		volume, pan, is_muted, is_soloed, icon
+		FROM tracks WHERE id = ?`,
 		id,
+	)
+	err := row.Scan(
+		&tr.Meta.ID, &tr.VersionID, active_take, &tr.CreatedAt, &tr.UpdatedAt, &tr.Name,
+		&tr.Volume, &tr.Pan, &tr.IsMuted, &tr.IsSoloed, &tr.Icon,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("mysql.track_repository.GetByID: %w", err)
+	}
+	if active_take.Valid {
+		tr.ActiveTake = active_take.String
+	} else {
+		tr.ActiveTake = ""
 	}
 	return tr, nil
 }
