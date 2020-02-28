@@ -77,11 +77,13 @@ func NewStudio(owenerID, name string) *Studio {
 type StudioUsecase interface {
 	Create(ownerID, name string) (*Studio, error)
 	FilterByOwnerID(ownerID string) (*[]Studio, error)
+	GetContents(studioID string) ([]*Song, []*Version, error)
 }
 
 type StudioRepository interface {
 	Create(*Studio) error
 	FilterByOwnerID(id string) (*[]Studio, error)
+	GetContents(studioID string) ([]*Song, []*Version, error)
 }
 
 type Song struct {
@@ -131,7 +133,7 @@ func NewVersion(songID, name string) *Version {
 
 type VersionUsecase interface {
 	Create(songID, name string) (*Version, error)
-	GetContents(verID string) ([]*Track, []*Take, error)
+	GetContents(verID string) ([]*Track, []*Take, []*File, error)
 }
 
 type VersionRepository interface {

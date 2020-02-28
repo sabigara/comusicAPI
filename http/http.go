@@ -3,27 +3,40 @@ package http
 import (
 	"net/http"
 	"os"
+	"reflect"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	comusic "github.com/sabigara/comusicAPI"
+	"github.com/sabigara/comusicAPI/utils"
 )
 
 type strKeyMap map[string]interface{}
 
-// Entity represents json response for a query for
+// RespEntity represents json response for a query for
 // an object type, keeping order in AllIds while
 // having capability to select one ByID.
-type Entity struct {
+type RespEntity struct {
 	ByID   strKeyMap `json:"byId"`
 	AllIDs []string  `json:"allIds"`
 }
 
-func NewEntity() *Entity {
-	return &Entity{
-		ByID:   strKeyMap{},
-		AllIDs: []string{},
+func NewRespEntity(data interface{}) *RespEntity {
+	ret := &RespEntity{}
+	ret.ByID = strKeyMap{}
+	ret.AllIDs = []string{}
+
+	s := reflect.ValueOf(data)
+	for i := 0; i < s.Len(); i++ {
+		d := s.Index(i).Elem()
+		// Should do type guard and nil check to ensure having "ID" field.
+		id := d.FieldByName("ID").String()
+		if !utils.Contains(ret.AllIDs, id) {
+			ret.AllIDs = append(ret.AllIDs, id)
+		}
+		ret.ByID[id] = d.Interface()
 	}
+	return ret
 }
 
 var profHandler *ProfileHandler
