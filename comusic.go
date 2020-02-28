@@ -100,11 +100,6 @@ func NewSong(studioID, name string) *Song {
 	}
 }
 
-type SongVer struct {
-	Data     *Song
-	Versions []*Version
-}
-
 type SongUsecase interface {
 	Create(studioID, name string) (*Song, error)
 }
