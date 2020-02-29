@@ -27,5 +27,10 @@ services:
     environment:
       DEBUG: 'true'
       DSN: mysql://user:userpass@tcp(db:3306)/database
+      # Currently, don't have to set this veriable.
+      # Single mock user is supplied for now.
       GOOGLE_APPLICATION_CREDENTIALS: <firebase_adminsdk.json>
+      # Local directory to upload files.
       UPLOADS_DIR: /build/uploads
+      # Base URL to retrieve the uploaded files.
+      UPLOADS_PATH: http://localhost:1323/uploads
