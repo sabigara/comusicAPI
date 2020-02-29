@@ -11,6 +11,13 @@ docker-compose -f docker-compose.dev.yaml up -d
 ```
 
 ```bash
+docker container exec -it comusic_api sh
+# in the container
+make migrate-up
+make dev
+```
+
+```bash
 curl --request POST \
   --url http://localhost:1323/studios \
   --header 'content-type: application/json' \
@@ -28,7 +35,7 @@ curl --request POST \
 # }
 ```
 
-Use `id` in the response as `sutdio_id` for following request:
+Use `id` in the response as `studio_id` for following request:
 
 ```bash
 curl --request POST \
@@ -38,3 +45,5 @@ curl --request POST \
         "name": "Song 1"
 }'
 ```
+
+Then, paste the `studio_id` on `const studioId=<studio_id>` in client's `/src/components/Browser.tsx` .
