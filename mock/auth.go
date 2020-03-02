@@ -6,7 +6,7 @@ import (
 	comusic "github.com/sabigara/comusicAPI"
 )
 
-func Aunthenticate(credentials ...interface{}) (*comusic.User, error) {
+func Authenticate(credentials ...interface{}) (*comusic.User, error) {
 	return &comusic.User{
 		Meta: &comusic.Meta{
 			ID:        "4148e7cc-a5f0-4fb4-9392-ee82f0e324d1",
