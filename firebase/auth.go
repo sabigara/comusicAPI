@@ -1,24 +1,29 @@
-package auth
+package firebase
 
 import (
 	"context"
 	"errors"
+	"strings"
 
-	firebase "firebase.google.com/go"
+	fb "firebase.google.com/go"
 	comusic "github.com/sabigara/comusicAPI"
 )
 
-var fbapp *firebase.App
+var fbapp *fb.App
 
 func Authenticate(credentials ...interface{}) (*comusic.User, error) {
 	if len(credentials) != 1 {
 		return nil, errors.New("auth: invalid credential")
 	}
-	idToken, ok := credentials[0].(string)
+	credential, ok := credentials[0].(string)
 	if !ok {
 		return nil, errors.New("auth: invalid credential")
 	}
-
+	tokenSlice := strings.Split(credential, "Bearer ")
+	if len(tokenSlice) != 2 {
+		return nil, errors.New("auth: malformed credential")
+	}
+	idToken := tokenSlice[1]
 	ctx := context.Background()
 	client, err := fbapp.Auth(ctx)
 	if err != nil {
@@ -37,7 +42,7 @@ func Authenticate(credentials ...interface{}) (*comusic.User, error) {
 
 func init() {
 	var err error
-	fbapp, err = firebase.NewApp(context.Background(), nil)
+	fbapp, err = fb.NewApp(context.Background(), nil)
 	if err != nil {
 		panic(err.Error())
 	}

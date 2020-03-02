@@ -7,6 +7,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/sabigara/comusicAPI/firebase"
 	"github.com/sabigara/comusicAPI/http"
 	"github.com/sabigara/comusicAPI/interactor"
 	"github.com/sabigara/comusicAPI/mock"
@@ -75,7 +76,7 @@ func inject() {
 		takeHandler,
 	)
 
-	http.SetAuthenticate(mock.Aunthenticate)
+	http.SetAuthenticate(firebase.Authenticate)
 }
 
 func main() {
