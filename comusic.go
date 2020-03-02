@@ -249,3 +249,7 @@ type FileRepository interface {
 	Delete(id string) error
 	URL(fileID string) string
 }
+
+type MailUsecase interface {
+	InviteToStudioNew(to, studio_name string) error
+}
