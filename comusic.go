@@ -59,10 +59,10 @@ type Studio struct {
 	Name    string `json:"name" db:"name"`
 }
 
-func NewStudio(owenerID, name string) *Studio {
+func NewStudio(ownerID, name string) *Studio {
 	return &Studio{
 		Meta:    NewMeta(),
-		OwnerID: owenerID,
+		OwnerID: ownerID,
 		Name:    name,
 	}
 }
@@ -245,4 +245,8 @@ type FileRepository interface {
 
 type MailUsecase interface {
 	InviteToStudioNew(to, studio_name, signupURL string) error
+}
+
+type UserRoleUsecase interface {
+	GetAll
 }
