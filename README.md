@@ -13,7 +13,6 @@ cp docker-compose.dev.sample.yaml docker-compose.dev.yaml
 Then, configure environment variables below in docker-compose.dev.yaml following instruction comments.
 
 * GOOGLE_APPLICATION_CREDENTIALS
-* SENDGRID_API_KEY
 
 ### Create docker containers
 
