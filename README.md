@@ -22,13 +22,14 @@ docker-compose -f docker-compose.dev.yaml build
 docker-compose -f docker-compose.dev.yaml up -d
 ```
 
+But `make dev` command specified in `docker-compose.dev.yaml` fails for the first time, because DB tables are not yet created. 
+
+So next process is necessary.
+
 ### Migrate DB
 
-`make dev` command specified in `docker-compose.dev.yaml` fails for the first time, because DB tables are not yet created.
-
 ```bash
-docker container exec -it comusic_api sh
-# in the container
+docker container exec -it comusic_api sh # login to the container
 make migrate-up # create tables
 make dev # restart server process
 ```
