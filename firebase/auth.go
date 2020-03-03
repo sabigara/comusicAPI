@@ -2,8 +2,8 @@ package firebase
 
 import (
 	"context"
-	"errors"
 	"strings"
+	"time"
 
 	fb "firebase.google.com/go"
 	comusic "github.com/sabigara/comusicAPI"
@@ -13,15 +13,15 @@ var fbapp *fb.App
 
 func Authenticate(credentials ...interface{}) (*comusic.User, error) {
 	if len(credentials) != 1 {
-		return nil, errors.New("auth: invalid credential")
+		return nil, comusic.ErrUnauthenticated
 	}
 	credential, ok := credentials[0].(string)
 	if !ok {
-		return nil, errors.New("auth: invalid credential")
+		return nil, comusic.ErrUnauthenticated
 	}
 	tokenSlice := strings.Split(credential, "Bearer ")
 	if len(tokenSlice) != 2 {
-		return nil, errors.New("auth: malformed credential")
+		return nil, comusic.ErrUnauthenticated
 	}
 	idToken := tokenSlice[1]
 	ctx := context.Background()
@@ -37,7 +37,15 @@ func Authenticate(credentials ...interface{}) (*comusic.User, error) {
 	if err != nil {
 		return nil, comusic.ErrAuthProcessFailed
 	}
-	return comusic.NewUser(user.UID, user.DisplayName, user.Email), nil
+	// TODO: UpdateTimestamp is not provided from firebase.
+	return &comusic.User{
+		Meta: &comusic.Meta{
+			ID: user.UID,
+			// CreationTimestamp is in milliseconds so divide by 1000.
+			CreatedAt: time.Unix(user.UserMetadata.CreationTimestamp/1000, 0),
+		},
+		Email: user.Email,
+	}, nil
 }
 
 func init() {
