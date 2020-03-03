@@ -251,5 +251,5 @@ type FileRepository interface {
 }
 
 type MailUsecase interface {
-	InviteToStudioNew(to, studio_name string) error
+	InviteToStudioNew(to, studio_name, signupURL string) error
 }

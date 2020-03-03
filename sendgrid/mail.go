@@ -50,9 +50,9 @@ func (u *MailUsecase) sendTemplate(to, templateID string, templateData TemplateD
 	return nil
 }
 
-func (u *MailUsecase) InviteToStudioNew(to, studio_name string) error {
+func (u *MailUsecase) InviteToStudioNew(to, studio_name, signupURL string) error {
 	return u.sendTemplate(to, "d-c0d11e8aede54caf9728b8fd11b3b09e", TemplateData{
 		"studio_name": studio_name,
-		"signin_url":  "http://localhost:3000/signin",
+		"signup_url":  signupURL,
 	})
 }
