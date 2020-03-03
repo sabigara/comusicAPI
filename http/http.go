@@ -45,6 +45,7 @@ var songHandler *SongHandler
 var verHandler *VersionHandler
 var trackHandler *TrackHandler
 var takeHandler *TakeHandler
+var hooks *Hooks
 
 var authenticate func(...interface{}) (*comusic.User, error)
 
@@ -56,6 +57,7 @@ func SetHandlers(
 	ver *VersionHandler,
 	track *TrackHandler,
 	take *TakeHandler,
+	h *Hooks,
 ) {
 	profHandler = prof
 	studioHandler = studio
@@ -63,6 +65,7 @@ func SetHandlers(
 	verHandler = ver
 	trackHandler = track
 	takeHandler = take
+	hooks = h
 }
 
 func SetAuthenticate(f func(...interface{}) (*comusic.User, error)) {
@@ -140,6 +143,10 @@ func Start(addr string, debug bool) {
 
 	e.POST("takes", takeHandler.create)
 	e.DELETE("takes/:id", takeHandler.delete)
+
+	// Hooks for handling events.
+	// TODO: Disable authMiddleware
+	e.POST("hooks/new-user", hooks.newUserCreated)
 
 	e.Logger.Fatal(e.Start(addr))
 }

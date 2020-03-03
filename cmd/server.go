@@ -67,6 +67,8 @@ func inject() {
 	trackUsecase.TakeUsecase = takeUsecase
 	trackHandler := http.NewTrackHandler(trackUsecase)
 
+	hooks := http.NewHooks(profileUsecase)
+
 	http.SetHandlers(
 		profileHandler,
 		studioHandler,
@@ -74,6 +76,7 @@ func inject() {
 		verHandler,
 		trackHandler,
 		takeHandler,
+		hooks,
 	)
 
 	http.SetAuthenticate(firebase.Authenticate)
