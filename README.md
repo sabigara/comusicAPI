@@ -2,20 +2,38 @@
 
 ## Start developing
 
+### Set up files
+
 ```bash
 git clone https://github.com/sabigara/comusicAPI
 cd comusicAPI
 cp docker-compose.dev.sample.yaml docker-compose.dev.yaml
+```
+
+Then, configure environment variables below in docker-compose.dev.yaml following instruction comments.
+
+* GOOGLE_APPLICATION_CREDENTIALS
+* SENDGRID_API_KEY
+
+### Create docker containers
+
+```bash
 docker-compose -f docker-compose.dev.yaml build
 docker-compose -f docker-compose.dev.yaml up -d
 ```
 
+### Migrate DB
+
+`make dev` command specified in `docker-compose.dev.yaml` fails for the first time, because DB tables are not yet created.
+
 ```bash
 docker container exec -it comusic_api sh
 # in the container
-make migrate-up
-make dev
+make migrate-up # create tables
+make dev # restart server process
 ```
+
+### Supply initial data
 
 ```bash
 curl --request POST \
@@ -45,5 +63,7 @@ curl --request POST \
         "name": "Song 1"
 }'
 ```
+
+### Modify source
 
 Then, paste the `studio_id` on `const studioId=<studio_id>` in client's `/src/components/Browser.tsx` .
