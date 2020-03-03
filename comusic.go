@@ -25,13 +25,6 @@ type User struct {
 	Email string `json:"email"`
 }
 
-func NewUser(id, displayName, email string) *User {
-	return &User{
-		Meta:  NewMeta(),
-		Email: email,
-	}
-}
-
 type Profile struct {
 	*Meta
 	UserID   string `json:"userId" db:"user_id"`
