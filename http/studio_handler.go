@@ -44,6 +44,7 @@ type StudioContents struct {
 	Version *RespEntity `json:"versions"`
 }
 
+// Plus studio members and song guests?
 func (h *StudioHandler) getContents(c echo.Context) error {
 	songs, vers, err := h.StudioUsecase.GetContents(c.Param("id"))
 	if err != nil {
