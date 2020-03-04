@@ -247,6 +247,40 @@ type MailUsecase interface {
 	InviteToStudioNew(to, studio_name, signupURL string) error
 }
 
-type UserRoleUsecase interface {
-	GetAll
+type GroupType = int
+
+const (
+	ErrGroupType GroupType = iota
+	StudioGroupType
+	SongGroupType
+)
+
+func NewGroupType(str string) GroupType {
+	switch str {
+	case "studio":
+		return StudioGroupType
+	case "song":
+		return SongGroupType
+	default:
+		return ErrGroupType
+	}
+}
+
+type Invitation struct {
+	Email      string `json:"email" db:"email"`
+	GroupID    string `json:"groupId" db:"group_id"`
+	GroupType  `json:"groupType" db:"group_type"`
+	IsAccepted bool `json:"isAccepted" db:"is_accepted"`
+}
+
+type InvitationUsecase interface {
+	Filter(email, groupID string) ([]*Invitation, error)
+	Create(email, groupID string, groupType GroupType) error
+	Accept(email, groupID string) error
+}
+
+type InvitationRepository interface {
+	Filter(email, groupID string) ([]*Invitation, error)
+	Create(email, groupID string, groupType GroupType) error
+	Accept(email, groupID string) error
 }

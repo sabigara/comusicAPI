@@ -67,6 +67,11 @@ func inject() {
 	trackUsecase.TakeUsecase = takeUsecase
 	trackHandler := http.NewTrackHandler(trackUsecase)
 
+	inviteRepository := mysql.NewInvitationRepository(db)
+	mailUsecase := mock.NewMailUsecase()
+	inviteUsecase := interactor.NewInvitationUsecase(inviteRepository, mailUsecase)
+	inviteHandler := http.NewInvitationHandler(inviteUsecase)
+
 	hooks := http.NewHooks(profileUsecase)
 
 	http.SetHandlers(
@@ -76,6 +81,7 @@ func inject() {
 		verHandler,
 		trackHandler,
 		takeHandler,
+		inviteHandler,
 		hooks,
 	)
 

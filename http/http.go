@@ -45,6 +45,7 @@ var songHandler *SongHandler
 var verHandler *VersionHandler
 var trackHandler *TrackHandler
 var takeHandler *TakeHandler
+var inviteHandler *InvitationHandler
 var hooks *Hooks
 
 var authenticate func(...interface{}) (*comusic.User, error)
@@ -57,6 +58,7 @@ func SetHandlers(
 	ver *VersionHandler,
 	track *TrackHandler,
 	take *TakeHandler,
+	invite *InvitationHandler,
 	h *Hooks,
 ) {
 	profHandler = prof
@@ -65,6 +67,7 @@ func SetHandlers(
 	verHandler = ver
 	trackHandler = track
 	takeHandler = take
+	inviteHandler = invite
 	hooks = h
 }
 
@@ -130,9 +133,15 @@ func Start(addr string, debug bool) {
 	e.GET("studios", studioHandler.get)
 	e.POST("studios", studioHandler.create)
 	e.GET("studios/:id/contents", studioHandler.getContents)
+	e.GET("studios/:id/members", nil)
+
+	e.GET("invitations", inviteHandler.filter)
+	e.PUT("invitations", inviteHandler.create)
+	e.PATCH("invitations", inviteHandler.accept)
 
 	e.POST("songs", songHandler.create)
 	e.DELETE("songs/:id", songHandler.delete)
+	e.GET("songs/:id/guests", nil)
 
 	e.POST("versions", verHandler.create)
 	e.GET("versions/:id/contents", verHandler.get)
