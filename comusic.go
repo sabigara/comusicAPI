@@ -25,6 +25,10 @@ type User struct {
 	Email string `json:"email"`
 }
 
+type AuthUsecase interface {
+	Authenticate(credentials ...interface{}) (*User, error)
+}
+
 type Profile struct {
 	*Meta
 	UserID   string `json:"userId" db:"user_id"`

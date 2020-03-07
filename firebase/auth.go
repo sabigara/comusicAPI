@@ -9,9 +9,15 @@ import (
 	comusic "github.com/sabigara/comusicAPI"
 )
 
-var fbapp *fb.App
+type AuthUsecase struct {
+	fbapp *fb.App
+}
 
-func Authenticate(credentials ...interface{}) (*comusic.User, error) {
+func NewAuthUsecase(fbapp *fb.App) *AuthUsecase {
+	return &AuthUsecase{fbapp: fbapp}
+}
+
+func (u *AuthUsecase) Authenticate(credentials ...interface{}) (*comusic.User, error) {
 	if len(credentials) != 1 {
 		return nil, comusic.ErrUnauthenticated
 	}
@@ -25,7 +31,7 @@ func Authenticate(credentials ...interface{}) (*comusic.User, error) {
 	}
 	idToken := tokenSlice[1]
 	ctx := context.Background()
-	client, err := fbapp.Auth(ctx)
+	client, err := u.fbapp.Auth(ctx)
 	if err != nil {
 		return nil, comusic.ErrAuthProcessFailed
 	}
@@ -46,12 +52,4 @@ func Authenticate(credentials ...interface{}) (*comusic.User, error) {
 		},
 		Email: user.Email,
 	}, nil
-}
-
-func init() {
-	var err error
-	fbapp, err = fb.NewApp(context.Background(), nil)
-	if err != nil {
-		panic(err.Error())
-	}
 }

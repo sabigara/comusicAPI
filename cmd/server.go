@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"os"
 	"strings"
 	"time"
+
+	fb "firebase.google.com/go"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -31,7 +34,21 @@ func openDB() *sqlx.DB {
 	return db
 }
 
-func inject() {
+func main() {
+	addr := "0.0.0.0:1323"
+	var debug bool
+	if val := os.Getenv("DEBUG"); val == "true" {
+		debug = true
+	} else {
+		debug = false
+	}
+
+	fbapp, err := fb.NewApp(context.Background(), nil)
+	if err != nil {
+		panic("Cannot initiate firebase App")
+	}
+	authUsecase := firebase.NewAuthUsecase(fbapp)
+
 	db := openDB()
 	profileRepository := mysql.NewProfileRepository(db)
 	profileUsecase := interactor.NewProfileUsecase(profileRepository)
@@ -74,7 +91,8 @@ func inject() {
 
 	hooks := http.NewHooks(profileUsecase)
 
-	http.SetHandlers(
+	http.New(
+		authUsecase,
 		profileHandler,
 		studioHandler,
 		songHandler,
@@ -83,19 +101,5 @@ func inject() {
 		takeHandler,
 		inviteHandler,
 		hooks,
-	)
-
-	http.SetAuthenticate(firebase.Authenticate)
-}
-
-func main() {
-	addr := "0.0.0.0:1323"
-	var debug bool
-	if val := os.Getenv("DEBUG"); val == "true" {
-		debug = true
-	} else {
-		debug = false
-	}
-	inject()
-	http.Start(addr, debug)
+	).Start(addr, debug)
 }

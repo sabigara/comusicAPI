@@ -39,42 +39,6 @@ func NewRespEntity(data interface{}) *RespEntity {
 	return ret
 }
 
-var profHandler *ProfileHandler
-var studioHandler *StudioHandler
-var songHandler *SongHandler
-var verHandler *VersionHandler
-var trackHandler *TrackHandler
-var takeHandler *TakeHandler
-var inviteHandler *InvitationHandler
-var hooks *Hooks
-
-var authenticate func(...interface{}) (*comusic.User, error)
-
-// SetHandlers sets all handlers with their all dependencies injected.
-func SetHandlers(
-	prof *ProfileHandler,
-	studio *StudioHandler,
-	song *SongHandler,
-	ver *VersionHandler,
-	track *TrackHandler,
-	take *TakeHandler,
-	invite *InvitationHandler,
-	h *Hooks,
-) {
-	profHandler = prof
-	studioHandler = studio
-	songHandler = song
-	verHandler = ver
-	trackHandler = track
-	takeHandler = take
-	inviteHandler = invite
-	hooks = h
-}
-
-func SetAuthenticate(f func(...interface{}) (*comusic.User, error)) {
-	authenticate = f
-}
-
 func errorHandler(e *echo.Echo) func(error, echo.Context) {
 	return func(err error, c echo.Context) {
 		he, ok := err.(*echo.HTTPError)
@@ -105,8 +69,44 @@ func errorHandler(e *echo.Echo) func(error, echo.Context) {
 	}
 }
 
+type HTTP struct {
+	comusic.AuthUsecase
+	*ProfileHandler
+	*StudioHandler
+	*SongHandler
+	*VersionHandler
+	*TrackHandler
+	*TakeHandler
+	*InvitationHandler
+	*Hooks
+}
+
+func New(
+	auth comusic.AuthUsecase,
+	prof *ProfileHandler,
+	studio *StudioHandler,
+	song *SongHandler,
+	ver *VersionHandler,
+	track *TrackHandler,
+	take *TakeHandler,
+	invite *InvitationHandler,
+	h *Hooks,
+) *HTTP {
+	return &HTTP{
+		AuthUsecase:       auth,
+		ProfileHandler:    prof,
+		StudioHandler:     studio,
+		SongHandler:       song,
+		VersionHandler:    ver,
+		TrackHandler:      track,
+		TakeHandler:       take,
+		InvitationHandler: invite,
+		Hooks:             h,
+	}
+}
+
 // Start starts server after settings routes.
-func Start(addr string, debug bool) {
+func (httpIns *HTTP) Start(addr string, debug bool) {
 	e := echo.New()
 	e.HideBanner = true
 	if debug {
@@ -124,38 +124,40 @@ func Start(addr string, debug bool) {
 	}))
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
-	e.Use(authMiddlewareWithConfig(authMiddlewareConfig{Authenticate: authenticate}))
+	e.Use(authMiddlewareWithConfig(
+		authMiddlewareConfig{AuthUsecase: httpIns.AuthUsecase},
+	))
 
-	e.GET("profile", profHandler.get)
-	e.POST("profile", profHandler.create)
-	e.PATCH("profile", profHandler.update)
+	e.GET("profile", httpIns.ProfileHandler.get)
+	e.POST("profile", httpIns.ProfileHandler.create)
+	e.PATCH("profile", httpIns.ProfileHandler.update)
 
-	e.GET("studios", studioHandler.get)
-	e.POST("studios", studioHandler.create)
-	e.GET("studios/:id/contents", studioHandler.getContents)
+	e.GET("studios", httpIns.StudioHandler.get)
+	e.POST("studios", httpIns.StudioHandler.create)
+	e.GET("studios/:id/contents", httpIns.StudioHandler.getContents)
 	e.GET("studios/:id/members", nil)
 
-	e.GET("invitations", inviteHandler.filter)
-	e.PUT("invitations", inviteHandler.create)
-	e.PATCH("invitations", inviteHandler.accept)
+	e.GET("invitations", httpIns.InvitationHandler.filter)
+	e.PUT("invitations", httpIns.InvitationHandler.create)
+	e.PATCH("invitations", httpIns.InvitationHandler.accept)
 
-	e.POST("songs", songHandler.create)
-	e.DELETE("songs/:id", songHandler.delete)
+	e.POST("songs", httpIns.SongHandler.create)
+	e.DELETE("songs/:id", httpIns.SongHandler.delete)
 	e.GET("songs/:id/guests", nil)
 
-	e.POST("versions", verHandler.create)
-	e.GET("versions/:id/contents", verHandler.get)
-	e.DELETE("versions/:id", verHandler.delete)
+	e.POST("versions", httpIns.VersionHandler.create)
+	e.GET("versions/:id/contents", httpIns.VersionHandler.get)
+	e.DELETE("versions/:id", httpIns.VersionHandler.delete)
 
-	e.POST("tracks", trackHandler.create)
-	e.DELETE("tracks/:id", trackHandler.delete)
+	e.POST("tracks", httpIns.TrackHandler.create)
+	e.DELETE("tracks/:id", httpIns.TrackHandler.delete)
 
-	e.POST("takes", takeHandler.create)
-	e.DELETE("takes/:id", takeHandler.delete)
+	e.POST("takes", httpIns.TakeHandler.create)
+	e.DELETE("takes/:id", httpIns.TrackHandler.delete)
 
 	// Hooks for handling events.
 	// TODO: Disable authMiddleware
-	e.POST("hooks/new-user", hooks.newUserCreated)
+	e.POST("hooks/new-user", httpIns.Hooks.newUserCreated)
 
 	e.Logger.Fatal(e.Start(addr))
 }

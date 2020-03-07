@@ -13,12 +13,10 @@ type (
 	// authMiddlewareConfig defines the config for Session middleware.
 	authMiddlewareConfig struct {
 		// Skipper defines a function to skip middleware.
-		Skipper      middleware.Skipper
-		Authenticate AuthFunc
+		Skipper     middleware.Skipper
+		AuthUsecase comusic.AuthUsecase
 	}
 )
-
-type AuthFunc func(credentials ...interface{}) (*comusic.User, error)
 
 var (
 	// DefaultConfig is the default Session middleware config.
@@ -31,7 +29,7 @@ func authMiddlewareWithConfig(config authMiddlewareConfig) echo.MiddlewareFunc {
 	if config.Skipper == nil {
 		config.Skipper = authMiddlewareDefaultConfig.Skipper
 	}
-	if config.Authenticate == nil {
+	if config.AuthUsecase == nil {
 		panic("Authenticate function is required for authMiddleware")
 	}
 
@@ -41,7 +39,7 @@ func authMiddlewareWithConfig(config authMiddlewareConfig) echo.MiddlewareFunc {
 				return next(c)
 			}
 			idToken := c.Request().Header.Get("Authorization")
-			user, err := config.Authenticate(idToken)
+			user, err := config.AuthUsecase.Authenticate(idToken)
 			if err != nil {
 				if errors.Is(err, comusic.ErrUnauthenticated) {
 					return echo.NewHTTPError(http.StatusUnauthorized).SetInternal(err)
