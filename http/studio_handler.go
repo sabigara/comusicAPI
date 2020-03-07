@@ -30,9 +30,10 @@ func (h *StudioHandler) create(c echo.Context) error {
 	return c.JSON(http.StatusCreated, profile)
 }
 
-func (h *StudioHandler) get(c echo.Context) error {
-	user := c.Get("user").(*comusic.User)
-	studios, err := h.FilterByOwnerID(user.ID)
+func (h *StudioHandler) filter(c echo.Context) error {
+	ownerID := c.QueryParam("owner_id")
+	memberID := c.QueryParam("member_id")
+	studios, err := h.Filter(ownerID, memberID)
 	if err != nil {
 		return err
 	}

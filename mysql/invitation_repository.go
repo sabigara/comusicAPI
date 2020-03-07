@@ -39,6 +39,24 @@ func (r *InvitationRepository) Filter(email, groupID string) ([]*comusic.Invitat
 	return ret, nil
 }
 
+func (r *InvitationRepository) GetByIDs(email, groupID string) (*comusic.Invitation, error) {
+	invite := &comusic.Invitation{}
+	var groupType string
+	row := r.QueryRow(
+		`SELECT email, group_id, group_type, is_accepted FROM invitations 
+		 WHERE email = ? AND group_id = ?`,
+		email, groupID,
+	)
+
+	err := row.Scan(&invite.Email, &invite.GroupID, &groupType, &invite.IsAccepted)
+	if err != nil {
+		return nil, fmt.Errorf("mysql.invitation_repository.GetContents: %w", err)
+	}
+	invite.GroupType = comusic.NewGroupType(groupType)
+
+	return invite, nil
+}
+
 func (r *InvitationRepository) Create(email, groupID string, groupType comusic.GroupType) error {
 	_, err := r.Exec(`
 		INSERT INTO invitations (group_id, email, group_type)

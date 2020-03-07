@@ -132,7 +132,7 @@ func (httpIns *HTTP) Start(addr string, debug bool) {
 	e.POST("profile", httpIns.ProfileHandler.create)
 	e.PATCH("profile", httpIns.ProfileHandler.update)
 
-	e.GET("studios", httpIns.StudioHandler.get)
+	e.GET("studios", httpIns.StudioHandler.filter)
 	e.POST("studios", httpIns.StudioHandler.create)
 	e.GET("studios/:id/contents", httpIns.StudioHandler.getContents)
 	e.GET("studios/:id/members", nil)
@@ -141,6 +141,7 @@ func (httpIns *HTTP) Start(addr string, debug bool) {
 	e.PUT("invitations", httpIns.InvitationHandler.create)
 	e.PATCH("invitations", httpIns.InvitationHandler.accept)
 
+	e.GET("songs", httpIns.SongHandler.filter)
 	e.POST("songs", httpIns.SongHandler.create)
 	e.DELETE("songs/:id", httpIns.SongHandler.delete)
 	e.GET("songs/:id/guests", nil)

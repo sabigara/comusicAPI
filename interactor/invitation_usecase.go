@@ -68,12 +68,9 @@ func (u *InvitationUsecase) Create(email, groupID string, groupType comusic.Grou
 }
 
 func (u *InvitationUsecase) Accept(email, groupID string) error {
-	invite, err := u.InvitationRepository.Filter(email, groupID)
+	invite, err := u.InvitationRepository.GetByIDs(email, groupID)
 	if err != nil {
 		return err
-	}
-	if len(invite) == 0 {
-		return comusic.ErrResourceNotFound
 	}
 	err = u.InvitationRepository.Accept(email, groupID)
 	if err != nil {
@@ -83,9 +80,11 @@ func (u *InvitationUsecase) Accept(email, groupID string) error {
 	if err != nil {
 		return err
 	}
-	switch invite[0].GroupType {
+	switch invite.GroupType {
 	case comusic.StudioGroupType:
 		return u.StudioUsecase.AddMembers(groupID, user.ID)
+	case comusic.SongGroupType:
+		return u.SongUsecase.AddGuests(groupID, user.ID)
 	default:
 		return nil
 	}

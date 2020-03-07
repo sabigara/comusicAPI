@@ -35,6 +35,30 @@ func (r *SongRepository) GetByID(id string) (*comusic.Song, error) {
 	return s, nil
 }
 
+func (r SongRepository) FilterByGuestID(guestID string) ([]*comusic.Song, error) {
+	songs := []*comusic.Song{}
+	rows, err := r.Query(`
+		SELECT songs.id, songs.studio_id, songs.created_at, songs.updated_at, songs.name
+		FROM songs 
+		INNER JOIN guest_song ON songs.id = guest_song.song_id
+		WHERE guest_song.user_id = ?`,
+		guestID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("mysql.song_repository.FilterByGuestID: %w", err)
+	}
+	for rows.Next() {
+		s := &comusic.Song{Meta: &comusic.Meta{}}
+		err := rows.Scan(
+			&s.ID, &s.StudioID, &s.CreatedAt, &s.UpdatedAt, &s.Name,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("mysql.studio_repository.FilterByGuestID: %w", err)
+		}
+		songs = append(songs, s)
+	}
+	return songs, nil
+}
 func (r *SongRepository) Create(song *comusic.Song) error {
 	_, err := r.Exec(`
 		INSERT INTO songs (id, studio_id, created_at, updated_at, name)
@@ -51,6 +75,20 @@ func (r *SongRepository) Delete(songID string) error {
 	_, err := r.Exec(`DELETE FROM songs WHERE id = ?`, songID)
 	if err != nil {
 		return fmt.Errorf("mysql.song_repository.Delete: %w", err)
+	}
+	return nil
+}
+
+func (r *SongRepository) AddGuests(songID string, userIDs ...string) error {
+	for _, userID := range userIDs {
+		_, err := r.Exec(`
+			INSERT INTO guest_song (user_id, song_id)
+			VALUES (?, ?)`,
+			userID, songID,
+		)
+		if err != nil {
+			return fmt.Errorf("mysql.song_repository.AddMembers: %w", err)
+		}
 	}
 	return nil
 }

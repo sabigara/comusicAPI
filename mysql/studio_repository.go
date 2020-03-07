@@ -61,8 +61,8 @@ func (r *StudioRepository) Update(id string, nickname, bio *string) error {
 	return nil
 }
 
-func (r *StudioRepository) FilterByOwnerID(ownerID string) (*[]comusic.Studio, error) {
-	p := &[]comusic.Studio{}
+func (r *StudioRepository) FilterByOwnerID(ownerID string) ([]*comusic.Studio, error) {
+	p := &[]*comusic.Studio{}
 	err := r.Select(
 		p,
 		`SELECT * FROM studios
@@ -75,12 +75,38 @@ func (r *StudioRepository) FilterByOwnerID(ownerID string) (*[]comusic.Studio, e
 		}
 		return nil, fmt.Errorf("mysql.profile_repository.Get: %w", err)
 	}
-	return p, nil
+	return *p, nil
+}
+
+func (r *StudioRepository) FilterByMemberID(memberID string) ([]*comusic.Studio, error) {
+	studios := []*comusic.Studio{}
+	rows, err := r.Query(`
+		SELECT studios.id, studios.owner_id, studios.created_at, studios.updated_at, studios.name
+		FROM studios
+		INNER JOIN member_studio ON studios.id = member_studio.studio_id
+		WHERE member_studio.user_id = ?`,
+		memberID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("mysql.studio_repository.GetContents: %w", err)
+	}
+	for rows.Next() {
+		s := &comusic.Studio{Meta: &comusic.Meta{}}
+		err := rows.Scan(
+			&s.ID, &s.OwnerID, &s.CreatedAt, &s.UpdatedAt, &s.Name,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("mysql.studio_repository.FilterByMemberID: %w", err)
+		}
+		studios = append(studios, s)
+	}
+	return studios, nil
 }
 
 func (r *StudioRepository) GetContents(studioID string) ([]*comusic.Song, []*comusic.Version, error) {
 	songs := []*comusic.Song{}
 	vers := []*comusic.Version{}
+	// Use OUTER JOIN to fetch all songs, including ones that don't have any version.
 	rows, err := r.Query(`
 		SELECT songs.id, songs.studio_id, songs.created_at, songs.updated_at, songs.name,
 		COALESCE(vers.id, ''),

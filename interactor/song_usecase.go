@@ -17,9 +17,13 @@ func NewSongUsecase(pr comusic.SongRepository) *SongUsecase {
 func (u *SongUsecase) GetByID(id string) (*comusic.Song, error) {
 	song, err := u.SongRepository.GetByID(id)
 	if err != nil {
-		return nil, fmt.Errorf("interactor.song_usecase.GetByID: %w", err)
+		return nil, err
 	}
 	return song, err
+}
+
+func (u *SongUsecase) Filter(guestID string) ([]*comusic.Song, error) {
+	return u.SongRepository.FilterByGuestID(guestID)
 }
 
 func (u *SongUsecase) Create(studioID, nickname string) (*comusic.Song, error) {
@@ -37,4 +41,8 @@ func (u *SongUsecase) Delete(songID string) error {
 		return fmt.Errorf("interactor.song_usecase.Delete: %w", err)
 	}
 	return nil
+}
+
+func (u *SongUsecase) AddGuests(songID string, userID ...string) error {
+	return u.SongRepository.AddGuests(songID, userID...)
 }

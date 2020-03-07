@@ -78,7 +78,7 @@ func NewStudio(ownerID, name string) *Studio {
 type StudioUsecase interface {
 	GetByID(id string) (*Studio, error)
 	Create(ownerID, name string) (*Studio, error)
-	FilterByOwnerID(ownerID string) (*[]Studio, error)
+	Filter(ownerID, memberID string) ([]*Studio, error)
 	GetContents(studioID string) ([]*Song, []*Version, error)
 	AddMembers(studioID string, userID ...string) error
 }
@@ -86,7 +86,8 @@ type StudioUsecase interface {
 type StudioRepository interface {
 	GetByID(id string) (*Studio, error)
 	Create(*Studio) error
-	FilterByOwnerID(id string) (*[]Studio, error)
+	FilterByOwnerID(id string) ([]*Studio, error)
+	FilterByMemberID(id string) ([]*Studio, error)
 	GetContents(studioID string) ([]*Song, []*Version, error)
 	AddMembers(studioID string, userID ...string) error
 }
@@ -106,15 +107,19 @@ func NewSong(studioID, name string) *Song {
 }
 
 type SongUsecase interface {
+	Filter(guestID string) ([]*Song, error)
 	GetByID(songID string) (*Song, error)
 	Create(studioID, name string) (*Song, error)
 	Delete(songID string) error
+	AddGuests(songID string, userID ...string) error
 }
 
 type SongRepository interface {
+	FilterByGuestID(guestID string) ([]*Song, error)
 	GetByID(songID string) (*Song, error)
 	Create(*Song) error
 	Delete(songID string) error
+	AddGuests(songID string, userID ...string) error
 }
 
 type Version struct {
@@ -295,6 +300,7 @@ type InvitationUsecase interface {
 }
 
 type InvitationRepository interface {
+	GetByIDs(email, groupID string) (*Invitation, error)
 	Filter(email, groupID string) ([]*Invitation, error)
 	Create(email, groupID string, groupType GroupType) error
 	Accept(email, groupID string) error

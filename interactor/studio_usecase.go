@@ -16,7 +16,7 @@ func NewStudioUsecase(studioRepo comusic.StudioRepository) *StudioUsecase {
 func (u *StudioUsecase) GetByID(id string) (*comusic.Studio, error) {
 	studio, err := u.StudioRepository.GetByID(id)
 	if err != nil {
-		return nil, fmt.Errorf("interactor.studio_usecase.GetByID: %w", err)
+		return nil, err
 	}
 	return studio, err
 }
@@ -30,12 +30,19 @@ func (u *StudioUsecase) Create(ownerID, nickname string) (*comusic.Studio, error
 	return studio, nil
 }
 
-func (u *StudioUsecase) FilterByOwnerID(ownerID string) (*[]comusic.Studio, error) {
-	user, err := u.StudioRepository.FilterByOwnerID(ownerID)
-	if err != nil {
-		return nil, fmt.Errorf("interactor.studio_usecase.Get: %w", err)
+func (u *StudioUsecase) Filter(ownerID, memberID string) (studios []*comusic.Studio, err error) {
+	switch {
+	case ownerID != "":
+		studios, err = u.StudioRepository.FilterByOwnerID(ownerID)
+	case memberID != "":
+		studios, err = u.StudioRepository.FilterByMemberID(memberID)
+	default:
+		return nil, fmt.Errorf("interactor.studio_usecase.Filter: no query provided.")
 	}
-	return user, err
+	if err != nil {
+		return nil, err
+	}
+	return
 }
 
 func (u *StudioUsecase) GetContents(studioID string) ([]*comusic.Song, []*comusic.Version, error) {

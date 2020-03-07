@@ -19,6 +19,15 @@ type SongCreateData struct {
 	Name string
 }
 
+func (h *SongHandler) filter(c echo.Context) error {
+	guestID := c.QueryParam("guest_id")
+	songs, err := h.Filter(guestID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, songs)
+}
+
 func (h *SongHandler) create(c echo.Context) error {
 	studioID := c.QueryParam("studio_id")
 	req := &SongCreateData{}
