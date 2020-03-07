@@ -41,7 +41,7 @@ func (h *InvitationHandler) create(c echo.Context) error {
 	if groupType == comusic.ErrGroupType {
 		return echo.NewHTTPError(http.StatusBadRequest, "invitation_handler.create: invalid group_type")
 	}
-	err := h.InvitationUsecase.Create(email, groupID, comusic.StudioGroupType)
+	err := h.InvitationUsecase.Create(email, groupID, groupType)
 	if err != nil {
 		return err
 	}
