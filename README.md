@@ -63,7 +63,3 @@ curl --request POST \
         "name": "Song 1"
 }'
 ```
-
-### Modify source
-
-Then, paste the `studio_id` on `const studioId=<studio_id>` in client's `/src/components/Browser.tsx` .
