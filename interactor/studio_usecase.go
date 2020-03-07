@@ -10,8 +10,15 @@ type StudioUsecase struct {
 	comusic.StudioRepository
 }
 
-func NewStudioUsecase(pr comusic.StudioRepository) *StudioUsecase {
-	return &StudioUsecase{StudioRepository: pr}
+func NewStudioUsecase(studioRepo comusic.StudioRepository) *StudioUsecase {
+	return &StudioUsecase{StudioRepository: studioRepo}
+}
+func (u *StudioUsecase) GetByID(id string) (*comusic.Studio, error) {
+	studio, err := u.StudioRepository.GetByID(id)
+	if err != nil {
+		return nil, fmt.Errorf("interactor.studio_usecase.GetByID: %w", err)
+	}
+	return studio, err
 }
 
 func (u *StudioUsecase) Create(ownerID, nickname string) (*comusic.Studio, error) {
@@ -37,4 +44,12 @@ func (u *StudioUsecase) GetContents(studioID string) ([]*comusic.Song, []*comusi
 		return nil, nil, fmt.Errorf("interactor.studio_usecase.GetContents: %w", err)
 	}
 	return songs, vers, nil
+}
+
+func (u *StudioUsecase) AddMembers(studioID string, userID ...string) error {
+	err := u.StudioRepository.AddMembers(studioID, userID...)
+	if err != nil {
+		return fmt.Errorf("interactor.studio_usecase.AddMember: %w", err)
+	}
+	return nil
 }

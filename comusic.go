@@ -25,6 +25,10 @@ type User struct {
 	Email string `json:"email"`
 }
 
+type UserRepository interface {
+	GetByEmail(email string) (*User, error)
+}
+
 type AuthUsecase interface {
 	Authenticate(credentials ...interface{}) (*User, error)
 }
@@ -72,15 +76,19 @@ func NewStudio(ownerID, name string) *Studio {
 }
 
 type StudioUsecase interface {
+	GetByID(id string) (*Studio, error)
 	Create(ownerID, name string) (*Studio, error)
 	FilterByOwnerID(ownerID string) (*[]Studio, error)
 	GetContents(studioID string) ([]*Song, []*Version, error)
+	AddMembers(studioID string, userID ...string) error
 }
 
 type StudioRepository interface {
+	GetByID(id string) (*Studio, error)
 	Create(*Studio) error
 	FilterByOwnerID(id string) (*[]Studio, error)
 	GetContents(studioID string) ([]*Song, []*Version, error)
+	AddMembers(studioID string, userID ...string) error
 }
 
 type Song struct {
@@ -98,11 +106,13 @@ func NewSong(studioID, name string) *Song {
 }
 
 type SongUsecase interface {
+	GetByID(songID string) (*Song, error)
 	Create(studioID, name string) (*Song, error)
 	Delete(songID string) error
 }
 
 type SongRepository interface {
+	GetByID(songID string) (*Song, error)
 	Create(*Song) error
 	Delete(songID string) error
 }
@@ -249,6 +259,7 @@ type FileRepository interface {
 
 type MailUsecase interface {
 	InviteToStudioNew(to, studio_name, signupURL string) error
+	InviteToStudio(user *User, studio_name string) error
 }
 
 type GroupType = int

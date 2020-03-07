@@ -85,8 +85,15 @@ func main() {
 	trackHandler := http.NewTrackHandler(trackUsecase)
 
 	inviteRepository := mysql.NewInvitationRepository(db)
+	userRepository := firebase.NewUserRepository(fbapp)
 	mailUsecase := mock.NewMailUsecase()
-	inviteUsecase := interactor.NewInvitationUsecase(inviteRepository, mailUsecase)
+	inviteUsecase := interactor.NewInvitationUsecase(
+		inviteRepository,
+		userRepository,
+		studioUsecase,
+		songUsecase,
+		mailUsecase,
+	)
 	inviteHandler := http.NewInvitationHandler(inviteUsecase)
 
 	hooks := http.NewHooks(profileUsecase)

@@ -1,6 +1,8 @@
 package mysql
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -14,6 +16,23 @@ type SongRepository struct {
 
 func NewSongRepository(db *sqlx.DB) *SongRepository {
 	return &SongRepository{DB: db}
+}
+
+func (r *SongRepository) GetByID(id string) (*comusic.Song, error) {
+	s := &comusic.Song{}
+	err := r.Get(
+		s,
+		`SELECT * FROM songs 
+		 WHERE id = ?`,
+		id,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("mysql.song_repository.GetByID: %w", comusic.ErrResourceNotFound)
+		}
+		return nil, fmt.Errorf("mysql.song_repository.Get: %w", err)
+	}
+	return s, nil
 }
 
 func (r *SongRepository) Create(song *comusic.Song) error {

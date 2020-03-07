@@ -18,6 +18,23 @@ func NewStudioRepository(db *sqlx.DB) *StudioRepository {
 	return &StudioRepository{DB: db}
 }
 
+func (r *StudioRepository) GetByID(id string) (*comusic.Studio, error) {
+	s := &comusic.Studio{}
+	err := r.Get(
+		s,
+		`SELECT * FROM studios 
+		 WHERE id = ?`,
+		id,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("mysql.studio_repository.GetByID: %w", comusic.ErrResourceNotFound)
+		}
+		return nil, fmt.Errorf("mysql.studio_repository.Get: %w", err)
+	}
+	return s, nil
+}
+
 func (r *StudioRepository) Create(p *comusic.Studio) error {
 	_, err := r.Exec(`
 		INSERT INTO studios (id, owner_id, created_at, updated_at, name)
@@ -95,4 +112,18 @@ func (r *StudioRepository) GetContents(studioID string) ([]*comusic.Song, []*com
 		}
 	}
 	return songs, vers, nil
+}
+
+func (r *StudioRepository) AddMembers(studioID string, userIDs ...string) error {
+	for _, userID := range userIDs {
+		_, err := r.Exec(`
+			INSERT INTO member_studio (user_id, studio_id)
+			VALUES (?, ?)`,
+			userID, studioID,
+		)
+		if err != nil {
+			return fmt.Errorf("mysql.studio_repository.AddMembers: %w", err)
+		}
+	}
+	return nil
 }

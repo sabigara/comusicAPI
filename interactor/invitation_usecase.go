@@ -8,34 +8,85 @@ import (
 
 type InvitationUsecase struct {
 	comusic.InvitationRepository
+	comusic.UserRepository
+	comusic.StudioUsecase
+	comusic.SongUsecase
 	comusic.MailUsecase
 }
 
-func NewInvitationUsecase(inviteRepo comusic.InvitationRepository, mailUsecase comusic.MailUsecase) *InvitationUsecase {
-	return &InvitationUsecase{InvitationRepository: inviteRepo, MailUsecase: mailUsecase}
+func NewInvitationUsecase(
+	inviteRepo comusic.InvitationRepository,
+	userRepo comusic.UserRepository,
+	studioUsecase comusic.StudioUsecase,
+	songUsecase comusic.SongUsecase,
+	mailUsecase comusic.MailUsecase,
+) *InvitationUsecase {
+	return &InvitationUsecase{
+		InvitationRepository: inviteRepo,
+		UserRepository:       userRepo,
+		StudioUsecase:        studioUsecase,
+		SongUsecase:          songUsecase,
+		MailUsecase:          mailUsecase,
+	}
 }
 
 func (u *InvitationUsecase) Filter(email, groupID string) ([]*comusic.Invitation, error) {
 	invites, err := u.InvitationRepository.Filter(email, groupID)
 	if err != nil {
-		return nil, fmt.Errorf("interactor.invitation_usecase.Filter: %w", err)
+		return nil, err
 	}
 	return invites, err
 }
 
-func (u *InvitationUsecase) Create(email, groupID string, groupType comusic.GroupType) error {
-	err := u.InvitationRepository.Create(email, groupID, groupType)
-	if err != nil {
-		return fmt.Errorf("interactor.invitation_usecase.Create: %w", err)
+func (u *InvitationUsecase) Create(email, groupID string, groupType comusic.GroupType) (err error) {
+	// Check if provided groupID exists as studioID or songID.
+	// If not, return error.
+	switch groupType {
+	case comusic.StudioGroupType:
+		_, err = u.StudioUsecase.GetByID(groupID)
+	case comusic.SongGroupType:
+		_, err = u.SongUsecase.GetByID(groupID)
+	default:
+		return fmt.Errorf("interactor.invitation_usecase.Create: Invalid GroupType")
 	}
-	u.MailUsecase.InviteToStudioNew(email, "studio_name", "http://localhost:3000/login")
-	return nil
+	if err != nil {
+		return err
+	}
+
+	err = u.InvitationRepository.Create(email, groupID, groupType)
+	if err != nil {
+		return err
+	}
+	// Check if the user already exists.
+	user, err := u.UserRepository.GetByEmail(email)
+	if err != nil {
+		err = u.MailUsecase.InviteToStudioNew(email, "studio_name", "http://localhost:3000/login")
+	} else {
+		err = u.MailUsecase.InviteToStudio(user, "studio_name")
+	}
+	return err
 }
 
 func (u *InvitationUsecase) Accept(email, groupID string) error {
-	err := u.InvitationRepository.Accept(email, groupID)
+	invite, err := u.InvitationRepository.Filter(email, groupID)
 	if err != nil {
-		return fmt.Errorf("interactor.invitation_usecase.Update: %w", err)
+		return err
 	}
-	return nil
+	if len(invite) == 0 {
+		return comusic.ErrResourceNotFound
+	}
+	err = u.InvitationRepository.Accept(email, groupID)
+	if err != nil {
+		return err
+	}
+	user, err := u.UserRepository.GetByEmail(email)
+	if err != nil {
+		return err
+	}
+	switch invite[0].GroupType {
+	case comusic.StudioGroupType:
+		return u.StudioUsecase.AddMembers(groupID, user.ID)
+	default:
+		return nil
+	}
 }
