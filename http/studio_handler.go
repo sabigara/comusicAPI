@@ -30,6 +30,10 @@ func (h *StudioHandler) create(c echo.Context) error {
 	return c.JSON(http.StatusCreated, profile)
 }
 
+type StudioFilterResp struct {
+	Studios *RespEntity `json:"studios"`
+}
+
 func (h *StudioHandler) filter(c echo.Context) error {
 	ownerID := c.QueryParam("owner_id")
 	memberID := c.QueryParam("member_id")
@@ -37,7 +41,8 @@ func (h *StudioHandler) filter(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, studios)
+	resp := &StudioFilterResp{Studios: NewRespEntity(studios)}
+	return c.JSON(http.StatusOK, resp)
 }
 
 type StudioContents struct {
