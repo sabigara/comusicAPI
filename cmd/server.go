@@ -96,7 +96,7 @@ func main() {
 	)
 	inviteHandler := http.NewInvitationHandler(inviteUsecase)
 
-	hooks := http.NewHooks(profileUsecase)
+	hooks := http.NewHooks(profileUsecase, studioUsecase)
 
 	http.New(
 		authUsecase,
