@@ -30,7 +30,7 @@ func authMiddlewareWithConfig(config authMiddlewareConfig) echo.MiddlewareFunc {
 		config.Skipper = authMiddlewareDefaultConfig.Skipper
 	}
 	if config.AuthUsecase == nil {
-		panic("Authenticate function is required for authMiddleware")
+		panic("AuthUsecase is required for authMiddleware")
 	}
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
