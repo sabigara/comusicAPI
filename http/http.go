@@ -154,7 +154,7 @@ func (httpIns *HTTP) Start(addr string, debug bool) {
 	e.DELETE("tracks/:id", httpIns.TrackHandler.delete)
 
 	e.POST("takes", httpIns.TakeHandler.create)
-	e.DELETE("takes/:id", httpIns.TrackHandler.delete)
+	e.DELETE("takes/:id", httpIns.TakeHandler.delete)
 
 	// Hooks for handling events.
 	// TODO: Disable authMiddleware
