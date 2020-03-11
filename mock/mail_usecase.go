@@ -22,7 +22,7 @@ func (u *MailUsecase) InviteToStudioNew(to, studio_name, signupURL string) error
 	return nil
 }
 
-func (u *MailUsecase) InviteToStudio(user *comusic.User, studio_name string) error {
-	u.Print(fmt.Sprintf("<InviteToStudio>\nuser: %s\nstudio_name: %s", user.Email, studio_name))
+func (u *MailUsecase) InviteToStudio(user *comusic.User, studio_name, signInURL string) error {
+	u.Print(fmt.Sprintf("<InviteToStudio>\nuser: %s\nstudio_name: %s\nsignin_url: %s", user.Email, studio_name, signInURL))
 	return nil
 }
