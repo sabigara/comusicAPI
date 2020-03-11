@@ -264,7 +264,7 @@ type FileRepository interface {
 
 type MailUsecase interface {
 	InviteToStudioNew(to, studio_name, signupURL string) error
-	InviteToStudio(user *User, studio_name string) error
+	InviteToStudio(user *User, studio_name, signInURL string) error
 }
 
 type GroupType = int

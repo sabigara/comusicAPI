@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	comusic "github.com/sabigara/comusicAPI"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
@@ -55,4 +56,9 @@ func (u *MailUsecase) InviteToStudioNew(to, studio_name, signupURL string) error
 		"studio_name": studio_name,
 		"signup_url":  signupURL,
 	})
+}
+
+func (u *MailUsecase) InviteToStudio(user *comusic.User, studio_name, signInURL string) error {
+	return u.sendTemplate(user.Email, "d-c3d0ddb3af6840e69adeb0bacd0da001",
+		TemplateData{"studio_nam": studio_name, "signin_url": signInURL})
 }

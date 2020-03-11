@@ -62,7 +62,7 @@ func (u *InvitationUsecase) Create(email, groupID string, groupType comusic.Grou
 	if err != nil {
 		err = u.MailUsecase.InviteToStudioNew(email, "studio_name", "http://localhost:3000/login")
 	} else {
-		err = u.MailUsecase.InviteToStudio(user, "studio_name")
+		err = u.MailUsecase.InviteToStudio(user, "studio_name", "http://localhost:3000/login")
 	}
 	return err
 }
