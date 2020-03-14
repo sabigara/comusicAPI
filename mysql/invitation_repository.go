@@ -19,7 +19,7 @@ func NewInvitationRepository(db *sqlx.DB) *InvitationRepository {
 func (r *InvitationRepository) Filter(email, groupID string) ([]*comusic.Invitation, error) {
 	ret := []*comusic.Invitation{}
 	rows, err := r.Query(
-		`SELECT email, group_id, group_type, is_accepted FROM invitations 
+		`SELECT id, created_at, updated_at, email, group_id, group_type, is_accepted FROM invitations 
 		 WHERE email = ? OR group_id = ?`,
 		email, groupID,
 	)
@@ -27,9 +27,9 @@ func (r *InvitationRepository) Filter(email, groupID string) ([]*comusic.Invitat
 		return nil, fmt.Errorf("mysql.invitation_repository.GetContents: %w", err)
 	}
 	for rows.Next() {
-		invite := &comusic.Invitation{}
+		invite := &comusic.Invitation{Meta: &comusic.Meta{}}
 		var groupType string
-		err := rows.Scan(&invite.Email, &invite.GroupID, &groupType, &invite.IsAccepted)
+		err := rows.Scan(&invite.ID, &invite.CreatedAt, &invite.UpdatedAt, &invite.Email, &invite.GroupID, &groupType, &invite.IsAccepted)
 		if err != nil {
 			return nil, fmt.Errorf("mysql.invitation_repository.GetContents: %w", err)
 		}
@@ -40,15 +40,15 @@ func (r *InvitationRepository) Filter(email, groupID string) ([]*comusic.Invitat
 }
 
 func (r *InvitationRepository) GetByIDs(email, groupID string) (*comusic.Invitation, error) {
-	invite := &comusic.Invitation{}
+	invite := &comusic.Invitation{Meta: &comusic.Meta{}}
 	var groupType string
 	row := r.QueryRow(
-		`SELECT email, group_id, group_type, is_accepted FROM invitations 
+		`SELECT id, created_at, updated_at, email, group_id, group_type, is_accepted FROM invitations 
 		 WHERE email = ? AND group_id = ?`,
 		email, groupID,
 	)
 
-	err := row.Scan(&invite.Email, &invite.GroupID, &groupType, &invite.IsAccepted)
+	err := row.Scan(&invite.ID, &invite.CreatedAt, &invite.UpdatedAt, &invite.Email, &invite.GroupID, &groupType, &invite.IsAccepted)
 	if err != nil {
 		return nil, fmt.Errorf("mysql.invitation_repository.GetContents: %w", err)
 	}
@@ -57,11 +57,11 @@ func (r *InvitationRepository) GetByIDs(email, groupID string) (*comusic.Invitat
 	return invite, nil
 }
 
-func (r *InvitationRepository) Create(email, groupID string, groupType comusic.GroupType) error {
+func (r *InvitationRepository) Create(inv *comusic.Invitation) error {
 	_, err := r.Exec(`
-		INSERT INTO invitations (group_id, email, group_type)
-		VALUES (?, ?, ?)`,
-		groupID, email, groupType,
+		INSERT INTO invitations (id, created_at, updated_at, group_id, email, group_type)
+		VALUES (?, ?, ?, ?, ?, ?)`,
+		inv.ID, inv.CreatedAt, inv.UpdatedAt, inv.GroupID, inv.Email, inv.GroupType,
 	)
 	if err != nil {
 		return fmt.Errorf("mysql.invitation_repository.Create: %w", err)

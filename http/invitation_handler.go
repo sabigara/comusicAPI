@@ -16,7 +16,7 @@ func NewInvitationHandler(inviteUsecase comusic.InvitationUsecase) *InvitationHa
 }
 
 type InvitationsResp struct {
-	Invitations []*comusic.Invitation `json:"invitations"`
+	Invitations *RespEntity `json:"invitations"`
 }
 
 func (h *InvitationHandler) filter(c echo.Context) error {
@@ -27,7 +27,7 @@ func (h *InvitationHandler) filter(c echo.Context) error {
 		return err
 	}
 	ret := &InvitationsResp{
-		Invitations: invites,
+		Invitations: NewRespEntity(invites),
 	}
 	return c.JSON(http.StatusOK, ret)
 }
@@ -53,14 +53,14 @@ type InvitationUpdateInput struct {
 }
 
 func (h *InvitationHandler) accept(c echo.Context) error {
+	user := c.Get("user").(*comusic.User)
 	groupID := c.QueryParam("group_id")
-	email := c.QueryParam("email")
 	input := &InvitationUpdateInput{}
 	err := c.Bind(input)
 	if err != nil {
 		return err
 	}
-	err = h.InvitationUsecase.Accept(email, groupID)
+	err = h.InvitationUsecase.Accept(user.Email, groupID)
 	if err != nil {
 		return err
 	}

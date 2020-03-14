@@ -10,10 +10,19 @@ import (
 type Hooks struct {
 	comusic.ProfileUsecase
 	comusic.StudioUsecase
+	comusic.PubSub
 }
 
-func NewHooks(profileUsecase comusic.ProfileUsecase, studioUsecase comusic.StudioUsecase) *Hooks {
-	return &Hooks{ProfileUsecase: profileUsecase, StudioUsecase: studioUsecase}
+func NewHooks(
+	profileUsecase comusic.ProfileUsecase,
+	studioUsecase comusic.StudioUsecase,
+	pubsub comusic.PubSub,
+) *Hooks {
+	return &Hooks{
+		ProfileUsecase: profileUsecase,
+		StudioUsecase:  studioUsecase,
+		PubSub:         pubsub,
+	}
 }
 
 type NewUserInput struct {
@@ -22,19 +31,18 @@ type NewUserInput struct {
 }
 
 func (h *Hooks) newUserCreated(c echo.Context) error {
-	req := &NewUserInput{}
-	c.Bind(req)
-	profile, err := h.ProfileUsecase.Create(req.UserID, req.Nickname, "")
+	user := c.Get("user").(*comusic.User)
+	_, err := h.ProfileUsecase.Create(user.ID, "", "")
 	if err != nil {
 		return err
 	}
-	studio, err := h.StudioUsecase.Create(req.UserID, "Your Studio")
+	studio, err := h.StudioUsecase.Create(user.ID, "Your Studio")
 	if err != nil {
 		return err
 	}
-	err = h.StudioUsecase.AddMembers(studio.ID, req.UserID)
+	err = h.StudioUsecase.AddMembers(studio.ID, user.ID)
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusCreated, profile)
+	return c.NoContent(http.StatusOK)
 }

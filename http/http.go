@@ -78,6 +78,7 @@ type HTTP struct {
 	*TrackHandler
 	*TakeHandler
 	*InvitationHandler
+	*PubSubAuthHandler
 	*Hooks
 }
 
@@ -90,6 +91,7 @@ func New(
 	track *TrackHandler,
 	take *TakeHandler,
 	invite *InvitationHandler,
+	pubsubAuth *PubSubAuthHandler,
 	h *Hooks,
 ) *HTTP {
 	return &HTTP{
@@ -101,6 +103,7 @@ func New(
 		TrackHandler:      track,
 		TakeHandler:       take,
 		InvitationHandler: invite,
+		PubSubAuthHandler: pubsubAuth,
 		Hooks:             h,
 	}
 }
@@ -155,6 +158,8 @@ func (httpIns *HTTP) Start(addr string, debug bool) {
 
 	e.POST("takes", httpIns.TakeHandler.create)
 	e.DELETE("takes/:id", httpIns.TakeHandler.delete)
+
+	e.GET("pubsub/token", httpIns.PubSubAuthHandler.get)
 
 	// Hooks for handling events.
 	// TODO: Disable authMiddleware

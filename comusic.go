@@ -287,10 +287,20 @@ func NewGroupType(str string) GroupType {
 }
 
 type Invitation struct {
+	*Meta
 	Email      string `json:"email" db:"email"`
 	GroupID    string `json:"groupId" db:"group_id"`
 	GroupType  `json:"groupType" db:"group_type"`
 	IsAccepted bool `json:"isAccepted" db:"is_accepted"`
+}
+
+func NewInvitation(email, groupID string, groupType GroupType) *Invitation {
+	return &Invitation{
+		Meta:      NewMeta(),
+		Email:     email,
+		GroupID:   groupID,
+		GroupType: groupType,
+	}
 }
 
 type InvitationUsecase interface {
@@ -302,6 +312,25 @@ type InvitationUsecase interface {
 type InvitationRepository interface {
 	GetByIDs(email, groupID string) (*Invitation, error)
 	Filter(email, groupID string) ([]*Invitation, error)
-	Create(email, groupID string, groupType GroupType) error
+	Create(*Invitation) error
 	Accept(email, groupID string) error
+}
+
+type PubSub interface {
+	GenerateToken(*User) (string, error)
+	Publish(channel string, message interface{}) error
+}
+
+type Publication struct {
+	*Meta
+	Type string      `json:"type"`
+	Data interface{} `json:"data"`
+}
+
+func NewPublication(pubType string, data interface{}) *Publication {
+	return &Publication{
+		Meta: NewMeta(),
+		Type: pubType,
+		Data: data,
+	}
 }

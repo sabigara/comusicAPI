@@ -12,6 +12,7 @@ type InvitationUsecase struct {
 	comusic.StudioUsecase
 	comusic.SongUsecase
 	comusic.MailUsecase
+	comusic.PubSub
 }
 
 func NewInvitationUsecase(
@@ -20,6 +21,7 @@ func NewInvitationUsecase(
 	studioUsecase comusic.StudioUsecase,
 	songUsecase comusic.SongUsecase,
 	mailUsecase comusic.MailUsecase,
+	pubsub comusic.PubSub,
 ) *InvitationUsecase {
 	return &InvitationUsecase{
 		InvitationRepository: inviteRepo,
@@ -27,6 +29,7 @@ func NewInvitationUsecase(
 		StudioUsecase:        studioUsecase,
 		SongUsecase:          songUsecase,
 		MailUsecase:          mailUsecase,
+		PubSub:               pubsub,
 	}
 }
 
@@ -53,7 +56,9 @@ func (u *InvitationUsecase) Create(email, groupID string, groupType comusic.Grou
 		return err
 	}
 
-	err = u.InvitationRepository.Create(email, groupID, groupType)
+	invitation := comusic.NewInvitation(email, groupID, groupType)
+
+	err = u.InvitationRepository.Create(invitation)
 	if err != nil {
 		return err
 	}
@@ -63,6 +68,13 @@ func (u *InvitationUsecase) Create(email, groupID string, groupType comusic.Grou
 		err = u.MailUsecase.InviteToStudioNew(email, "studio_name", "http://localhost:3000/login")
 	} else {
 		err = u.MailUsecase.InviteToStudio(user, "studio_name", "http://localhost:3000/login")
+		if err != nil {
+			return err
+		}
+		err = u.PubSub.Publish("invitation#"+user.ID, comusic.NewPublication("invitation", invitation))
+		if err != nil {
+			return err
+		}
 	}
 	return err
 }

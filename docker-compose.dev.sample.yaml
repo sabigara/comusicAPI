@@ -33,6 +33,10 @@ services:
       UPLOADS_DIR: /build/uploads
       # Base URL to retrieve the uploaded files.
       UPLOADS_PATH: http://localhost:1323/uploads
+      # Config file for dev at: ./centrifugo/config.dev.json
+      CENTRIFUGO_API_KEY: 5f8661e7-e7c4-4436-ad65-c3a5ac5e8a66
+      CENTRIFUGO_SECRET: 64915974-efe3-495c-aa77-2a9b263991cf
+      CENTRIFUGO_URL: http://centrifugo:8000
 
       # Set path to firebase adminsdk json file.
       # As an example, it's put in /credentials directory on container which is
@@ -40,3 +44,12 @@ services:
       # GOOGLE_APPLICATION_CREDENTIALS: /credentials/<firebase_adminsdk.json>
 
       #SENDGRID_API_KEY: <sendgrid-api-key>
+
+    centrifugo:
+    image: centrifugo/centrifugo
+    container_name: comusic_centrifugo
+    volumes:
+      - ./centrifugo:/centrifugo
+    command: centrifugo -c config.dev.json
+    ports:
+      - 8888:8000

@@ -7,9 +7,11 @@ import (
 	"time"
 
 	fb "firebase.google.com/go"
+	"github.com/centrifugal/gocent"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/sabigara/comusicAPI/centrifugo"
 	"github.com/sabigara/comusicAPI/firebase"
 	"github.com/sabigara/comusicAPI/http"
 	"github.com/sabigara/comusicAPI/interactor"
@@ -48,6 +50,18 @@ func main() {
 		panic("Cannot initiate firebase App")
 	}
 	authUsecase := firebase.NewAuthUsecase(fbapp)
+
+	centrifugoURL := os.Getenv("CENTRIFUGO_URL")
+	centrifugoAPIKey := os.Getenv("CENTRIFUGO_API_KEY")
+	centrifugoSecret := os.Getenv("CENTRIFUGO_SECRET")
+	if centrifugoURL == "" || centrifugoAPIKey == "" || centrifugoSecret == "" {
+		panic("Environment variable CENTRIFUGO_URL or CENTRIFUGO_API_KEY or CENTRIFUGO_SECRET is not set")
+	}
+	centr := gocent.New(gocent.Config{
+		Addr: centrifugoURL,
+		Key:  centrifugoAPIKey,
+	})
+	pubsub := centrifugo.NewPubSub(centr, centrifugoSecret)
 
 	db := openDB()
 	profileRepository := mysql.NewProfileRepository(db)
@@ -93,10 +107,12 @@ func main() {
 		studioUsecase,
 		songUsecase,
 		mailUsecase,
+		pubsub,
 	)
 	inviteHandler := http.NewInvitationHandler(inviteUsecase)
 
-	hooks := http.NewHooks(profileUsecase, studioUsecase)
+	pubsubAuthHandler := http.NewPubSubAuthHandler(pubsub)
+	hooks := http.NewHooks(profileUsecase, studioUsecase, pubsub)
 
 	http.New(
 		authUsecase,
@@ -107,6 +123,7 @@ func main() {
 		trackHandler,
 		takeHandler,
 		inviteHandler,
+		pubsubAuthHandler,
 		hooks,
 	).Start(addr, debug)
 }

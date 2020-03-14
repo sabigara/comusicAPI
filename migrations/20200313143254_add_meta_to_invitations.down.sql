@@ -1,0 +1,8 @@
+START TRANSACTION;
+
+ALTER TABLE invitations 
+DROP COLUMN id ,
+DROP COLUMN created_at,
+DROP COLUMN updated_at;
+
+COMMIT;
