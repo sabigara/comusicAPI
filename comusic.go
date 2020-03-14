@@ -53,12 +53,14 @@ type ProfileUsecase interface {
 	Create(userID, nickname, bio string) (*Profile, error)
 	Update(userID string, nickname, bio *string) error
 	GetByUserID(userID string) (*Profile, error)
+	GetStudioMembers(studioID string) ([]*Profile, error)
 }
 
 type ProfileRepository interface {
 	Create(*Profile) error
 	Update(userID string, nickname, bio *string) error
 	GetByUserID(userID string) (*Profile, error)
+	GetStudioMembers(studioID string) ([]*Profile, error)
 }
 
 type Studio struct {

@@ -70,7 +70,7 @@ func main() {
 
 	studioRepository := mysql.NewStudioRepository(db)
 	studioUsecase := interactor.NewStudioUsecase(studioRepository)
-	studioHandler := http.NewStudioHandler(studioUsecase)
+	studioHandler := http.NewStudioHandler(studioUsecase, profileUsecase)
 
 	songRepository := mysql.NewSongRepository(db)
 	songUsecase := interactor.NewSongUsecase(songRepository)

@@ -38,3 +38,7 @@ func (u *ProfileUsecase) GetByUserID(userID string) (*comusic.Profile, error) {
 	}
 	return user, err
 }
+
+func (u *ProfileUsecase) GetStudioMembers(studioID string) ([]*comusic.Profile, error) {
+	return u.ProfileRepository.GetStudioMembers(studioID)
+}

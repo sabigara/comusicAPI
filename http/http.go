@@ -138,7 +138,7 @@ func (httpIns *HTTP) Start(addr string, debug bool) {
 	e.GET("studios", httpIns.StudioHandler.filter)
 	e.POST("studios", httpIns.StudioHandler.create)
 	e.GET("studios/:id/contents", httpIns.StudioHandler.getContents)
-	e.GET("studios/:id/members", nil)
+	e.GET("studios/:id/members", httpIns.StudioHandler.getMembers)
 
 	e.GET("invitations", httpIns.InvitationHandler.filter)
 	e.PUT("invitations", httpIns.InvitationHandler.create)

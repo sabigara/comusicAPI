@@ -60,3 +60,13 @@ func (r *ProfileRepository) GetByUserID(userID string) (*comusic.Profile, error)
 	}
 	return p, nil
 }
+
+func (r *ProfileRepository) GetStudioMembers(studioID string) ([]*comusic.Profile, error) {
+	ps := &[]*comusic.Profile{}
+	err := r.Select(ps, `
+		SELECT p.id, p.user_id, p.created_at, p.updated_at, p.nickname, p.bio FROM profiles as p
+		INNER JOIN member_studio ON p.user_id = member_studio.user_id
+		WHERE member_studio.studio_id = ?
+	`, studioID)
+	return *ps, err
+}

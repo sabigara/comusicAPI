@@ -9,10 +9,17 @@ import (
 
 type StudioHandler struct {
 	comusic.StudioUsecase
+	comusic.ProfileUsecase
 }
 
-func NewStudioHandler(studioUsecase comusic.StudioUsecase) *StudioHandler {
-	return &StudioHandler{StudioUsecase: studioUsecase}
+func NewStudioHandler(
+	studioUsecase comusic.StudioUsecase,
+	profileUsecase comusic.ProfileUsecase,
+) *StudioHandler {
+	return &StudioHandler{
+		StudioUsecase:  studioUsecase,
+		ProfileUsecase: profileUsecase,
+	}
 }
 
 type StudioCreateData struct {
@@ -61,4 +68,17 @@ func (h *StudioHandler) getContents(c echo.Context) error {
 		Version: NewRespEntity(vers),
 	}
 	return c.JSON(http.StatusOK, ret)
+}
+
+type GetStudioMembersResp struct {
+	Members *RespEntity `json:"members"`
+}
+
+func (h *StudioHandler) getMembers(c echo.Context) error {
+	id := c.Param("id")
+	members, err := h.ProfileUsecase.GetStudioMembers(id)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, &GetStudioMembersResp{Members: NewRespEntity(members)})
 }
